@@ -22,7 +22,7 @@
 
 | # | Criterion | Status |
 |---|---|---|
-| H1 | 🔴 GitHub repo is **public** and stays public | [ ] |
+| H1 | 🔴 GitHub repo is **public** and stays public (`https://github.com/mhddanial/MLH_Hack.git`) | [x] |
 | H2 | 🔴 **MIT** `LICENSE` file at the repo root | [x] |
 | H3 | 🔴 README names the open-weight model (**Gemma 4**, model ID `gemma-4-26b-a4b-it`), prompt version, dependencies | [x] |
 | H4 | 🔴 README has an **architecture diagram** | [x] |

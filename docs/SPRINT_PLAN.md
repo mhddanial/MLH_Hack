@@ -44,17 +44,17 @@ flowchart LR
 
 ### 0.2 Repository skeleton (Unified Next.js Full-Stack SPA on Vercel)
 - [x] 🔴 Folder structure: `src/app/` (SPA + API Route Handlers), `src/lib/` (config, schema, gemma, storage), `public/samples/`, `sample_data/`, `scripts/`, `docs/`
-- [ ] 🔴 `package.json`, `tsconfig.json`, `next.config.mjs`, `postcss.config.mjs` (Next.js + React + TypeScript + Tailwind CSS)
+- [x] 🔴 `package.json`, `tsconfig.json`, `next.config.mjs`, `postcss.config.mjs` (Next.js + React + TypeScript + Tailwind CSS)
 - [x] 🔴 `LICENSE` (MIT)
 - [x] 🔴 `.gitignore` (`node_modules/`, `.next/`, `.vercel/`, `.env`, `data/`)
 - [x] 🔴 `.env.example` (`GEMINI_API_KEY`, `GEMMA_MODEL_ID`, `AI_MODE`, `CONFIDENCE_THRESHOLD`, `SUPABASE_URL`, `SUPABASE_KEY`)
 - [x] 🔴 `README.md` with full setup, Vercel deployment, architecture, schema, DMAIC, and MLH disclosures
 - [x] 🔴 `sample_data/DATA_SOURCES.md`
-- [ ] 🔴 `git init` + first commit
-- [ ] 🔴 Create the public GitHub repo `aoi-lite-batam` and push
+- [x] 🔴 `git init` + first commit (`da9e73b`)
+- [x] 🔴 Create the public GitHub repo (`https://github.com/mhddanial/MLH_Hack.git`) and push `main`
 
 ### 0.3 Environment
-- [ ] 🔴 `npm install` succeeds in `project/`
+- [x] 🔴 `npm install` succeeds in `project/` (0 vulnerabilities)
 - [x] 🔴 `.env` created locally with valid `GEMINI_API_KEY` and `SUPABASE_URL` / `SUPABASE_KEY` (never committed)
 
 ### 0.4 AI contract
