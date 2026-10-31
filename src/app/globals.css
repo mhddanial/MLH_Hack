@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+:root {
+  /* IBM Carbon Design System Tokens (from docs/DESIGN.md) */
+  --color-primary: #0f62fe;
+  --color-on-primary: #ffffff;
+  --color-blue-60: #0043ce;
+  --color-blue-80: #002d9c;
+  --color-blue-hover: #0050e6;
+
+  --color-ink: #161616;
+  --color-ink-muted: #525252;
+  --color-ink-subtle: #8c8c8c;
+
+  --color-canvas: #ffffff;
+  --color-surface-1: #f4f4f4;
+  --color-surface-2: #e0e0e0;
+
+  --color-inverse-canvas: #161616;
+  --color-inverse-surface-1: #262626;
+  --color-inverse-ink: #ffffff;
+  --color-inverse-ink-muted: #c6c6c6;
+
+  --color-hairline: #e0e0e0;
+  --color-hairline-strong: #161616;
+
+  --color-semantic-success: #24a148;
+  --color-semantic-warning: #f1c21b;
+  --color-semantic-error: #da1e28;
+  --color-semantic-info: #0f62fe;
+
+  color-scheme: light;
+}
+
+* {
+  border-radius: 0px;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-plex-sans), "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.16px;
+}
+
+/* Carbon Input Focus & Hairline Spec */
+.carbon-input {
+  background-color: var(--color-surface-1);
+  color: var(--color-ink);
+  padding: 11px 16px;
+  min-height: 48px;
+  border: none;
+  border-bottom: 1px solid var(--color-hairline-strong);
+  outline: none;
+  letter-spacing: 0.16px;
+  transition: border-color 120ms ease, outline 120ms ease;
+}
+
+.carbon-input:focus {
+  border-bottom: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* Carbon Buttons Spec (0px radius, 48px touch target, 12px 16px padding) */
+.carbon-btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 12px 16px;
+  min-height: 48px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.29;
+  letter-spacing: 0.16px;
+  transition: background-color 120ms ease;
+}
+
+.carbon-btn-primary:hover:not(:disabled) {
+  background-color: var(--color-blue-hover);
+}
+
+.carbon-btn-primary:active:not(:disabled) {
+  background-color: var(--color-blue-80);
+}
+
+.carbon-btn-primary:disabled {
+  background-color: var(--color-surface-2);
+  color: var(--color-ink-subtle);
+  cursor: not-allowed;
+}
+
+.carbon-btn-secondary {
+  background-color: var(--color-ink);
+  color: var(--color-inverse-ink);
+  padding: 12px 16px;
+  min-height: 48px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.29;
+  letter-spacing: 0.16px;
+  transition: background-color 120ms ease;
+}
+
+.carbon-btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-inverse-surface-1);
+}
+
+.carbon-btn-tertiary {
+  background-color: var(--color-canvas);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  padding: 12px 16px;
+  min-height: 48px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.29;
+  letter-spacing: 0.16px;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.carbon-btn-tertiary:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.carbon-btn-danger {
+  background-color: var(--color-semantic-error);
+  color: var(--color-on-primary);
+  padding: 12px 16px;
+  min-height: 48px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.29;
+  letter-spacing: 0.16px;
+}

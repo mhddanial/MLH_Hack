@@ -1,0 +1,32 @@
+# Node.js / Next.js / Vercel
+node_modules/
+.next/
+out/
+build/
+.vercel/
+next-env.d.ts
+*.tsbuildinfo
+
+# Python helper scripts (sample preparation)
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Secrets & Environment Variables
+.env
+.env.*
+!.env.example
+
+# Runtime Local Fallback Storage
+data/aoi_lite.db
+data/aoi_lite.db-journal
+data/local_records.json
+data/uploads/*
+!data/uploads/.gitkeep
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

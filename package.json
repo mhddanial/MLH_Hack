@@ -1,0 +1,30 @@
+{
+  "name": "aoi-lite-batam",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Human-in-the-Loop Multimodal Gemma 4 SMT/PCB Inspection Assistant & Quality-Record System",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.98.0",
+    "lucide-react": "^1.16.0",
+    "next": "^16.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "tailwindcss": "^4.2.0",
+    "typescript": "^5.8.0"
+  }
+}
+
