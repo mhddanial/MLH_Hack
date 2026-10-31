@@ -1,0 +1,630 @@
+{
+  "samples": [
+    {
+      "id": "pku_short_01",
+      "title": "Short (01)",
+      "category": "PKU Short",
+      "orig_defect_class": "short",
+      "expected_defect_class": "solder_bridge",
+      "expected_severity": "high",
+      "expected_disposition": "rework",
+      "board_id": "BAT-PCBA-101",
+      "image_url": "/samples/pku_short_01.jpg",
+      "width": 1400,
+      "height": 731,
+      "location_hint": "lower-left quadrant, lower-right quadrant",
+      "bboxes": [
+        {
+          "orig_label": "short",
+          "bbox_norm": [
+            0.2515,
+            0.7163,
+            0.2729,
+            0.7573
+          ],
+          "quadrant": "lower-left quadrant"
+        },
+        {
+          "orig_label": "short",
+          "bbox_norm": [
+            0.1773,
+            0.5902,
+            0.2004,
+            0.6293
+          ],
+          "quadrant": "lower-left quadrant"
+        },
+        {
+          "orig_label": "short",
+          "bbox_norm": [
+            0.7581,
+            0.6942,
+            0.7762,
+            0.7207
+          ],
+          "quadrant": "lower-right quadrant"
+        }
+      ],
+      "is_golden": false,
+      "description": "Kaggle/PKU bare-PCB sample with 3 annotated short anomaly(s) in lower-left quadrant, lower-right quadrant."
+    },
+    {
+      "id": "pku_short_02",
+      "title": "Short (04)",
+      "category": "PKU Short",
+      "orig_defect_class": "short",
+      "expected_defect_class": "solder_bridge",
+      "expected_severity": "high",
+      "expected_disposition": "rework",
+      "board_id": "BAT-PCBA-104",
+      "image_url": "/samples/pku_short_02.jpg",
+      "width": 1400,
+      "height": 1128,
+      "location_hint": "center-left region, lower-center region, upper-center region",
+      "bboxes": [
+        {
+          "orig_label": "short",
+          "bbox_norm": [
+            0.2804,
+            0.4752,
+            0.3089,
+            0.5073
+          ],
+          "quadrant": "center-left region"
+        },
+        {
+          "orig_label": "short",
+          "bbox_norm": [
+            0.4463,
+            0.192,
+            0.4738,
+            0.2277
+          ],
+          "quadrant": "upper-center region"
+        },
+        {
+          "orig_label": "short",
+          "bbox_norm": [
+            0.444,
+            0.6165,
+            0.4732,
+            0.6546
+          ],
+          "quadrant": "lower-center region"
+        }
+      ],
+      "is_golden": false,
+      "description": "Kaggle/PKU bare-PCB sample with 3 annotated short anomaly(s) in center-left region, lower-center region, upper-center region."
+    },
+    {
+      "id": "pku_open_01",
+      "title": "Open circuit (01)",
+      "category": "PKU Open circuit",
+      "orig_defect_class": "open_circuit",
+      "expected_defect_class": "uncertain_or_other",
+      "expected_severity": "high",
+      "expected_disposition": "requires_human_verification",
+      "board_id": "BAT-PCBA-102",
+      "image_url": "/samples/pku_open_01.jpg",
+      "width": 1400,
+      "height": 731,
+      "location_hint": "lower-center region, lower-left quadrant, upper-center region",
+      "bboxes": [
+        {
+          "orig_label": "open_circuit",
+          "bbox_norm": [
+            0.5073,
+            0.7245,
+            0.5221,
+            0.7598
+          ],
+          "quadrant": "lower-center region"
+        },
+        {
+          "orig_label": "open_circuit",
+          "bbox_norm": [
+            0.353,
+            0.8462,
+            0.3668,
+            0.8701
+          ],
+          "quadrant": "lower-left quadrant"
+        },
+        {
+          "orig_label": "open_circuit",
+          "bbox_norm": [
+            0.555,
+            0.2945,
+            0.5692,
+            0.3172
+          ],
+          "quadrant": "upper-center region"
+        }
+      ],
+      "is_golden": false,
+      "description": "Kaggle/PKU bare-PCB sample with 3 annotated open circuit anomaly(s) in lower-center region, lower-left quadrant, upper-center region."
+    },
+    {
+      "id": "pku_open_02",
+      "title": "Open circuit (04)",
+      "category": "PKU Open circuit",
+      "orig_defect_class": "open_circuit",
+      "expected_defect_class": "uncertain_or_other",
+      "expected_severity": "high",
+      "expected_disposition": "requires_human_verification",
+      "board_id": "BAT-PCBA-105",
+      "image_url": "/samples/pku_open_02.jpg",
+      "width": 1400,
+      "height": 1128,
+      "location_hint": "center-left region, lower-left quadrant",
+      "bboxes": [
+        {
+          "orig_label": "open_circuit",
+          "bbox_norm": [
+            0.142,
+            0.8835,
+            0.1607,
+            0.9107
+          ],
+          "quadrant": "lower-left quadrant"
+        },
+        {
+          "orig_label": "open_circuit",
+          "bbox_norm": [
+            0.144,
+            0.5576,
+            0.163,
+            0.5791
+          ],
+          "quadrant": "center-left region"
+        },
+        {
+          "orig_label": "open_circuit",
+          "bbox_norm": [
+            0.195,
+            0.4923,
+            0.2215,
+            0.5199
+          ],
+          "quadrant": "center-left region"
+        }
+      ],
+      "is_golden": false,
+      "description": "Kaggle/PKU bare-PCB sample with 3 annotated open circuit anomaly(s) in center-left region, lower-left quadrant."
+    },
+    {
+      "id": "pku_missing_hole_01",
+      "title": "Missing hole (01)",
+      "category": "PKU Missing hole",
+      "orig_defect_class": "missing_hole",
+      "expected_defect_class": "uncertain_or_other",
+      "expected_severity": "medium",
+      "expected_disposition": "requires_human_verification",
+      "board_id": "BAT-PCBA-103",
+      "image_url": "/samples/pku_missing_hole_01.jpg",
+      "width": 1400,
+      "height": 731,
+      "location_hint": "center-right region, lower-right quadrant, upper-center region",
+      "bboxes": [
+        {
+          "orig_label": "missing_hole",
+          "bbox_norm": [
+            0.8105,
+            0.8033,
+            0.8339,
+            0.838
+          ],
+          "quadrant": "lower-right quadrant"
+        },
+        {
+          "orig_label": "missing_hole",
+          "bbox_norm": [
+            0.5316,
+            0.2106,
+            0.5534,
+            0.2497
+          ],
+          "quadrant": "upper-center region"
+        },
+        {
+          "orig_label": "missing_hole",
+          "bbox_norm": [
+            0.5689,
+            0.5006,
+            0.5923,
+            0.5385
+          ],
+          "quadrant": "center-right region"
+        }
+      ],
+      "is_golden": false,
+      "description": "Kaggle/PKU bare-PCB sample with 3 annotated missing hole anomaly(s) in center-right region, lower-right quadrant, upper-center region."
+    },
+    {
+      "id": "pku_missing_hole_02",
+      "title": "Missing hole (04)",
+      "category": "PKU Missing hole",
+      "orig_defect_class": "missing_hole",
+      "expected_defect_class": "uncertain_or_other",
+      "expected_severity": "medium",
+      "expected_disposition": "requires_human_verification",
+      "board_id": "BAT-PCBA-106",
+      "image_url": "/samples/pku_missing_hole_02.jpg",
+      "width": 1400,
+      "height": 1128,
+      "location_hint": "lower-right quadrant, upper-center region, upper-right quadrant",
+      "bboxes": [
+        {
+          "orig_label": "missing_hole",
+          "bbox_norm": [
+            0.6999,
+            0.3056,
+            0.7163,
+            0.3344
+          ],
+          "quadrant": "upper-right quadrant"
+        },
+        {
+          "orig_label": "missing_hole",
+          "bbox_norm": [
+            0.6927,
+            0.6453,
+            0.7104,
+            0.668
+          ],
+          "quadrant": "lower-right quadrant"
+        },
+        {
+          "orig_label": "missing_hole",
+          "bbox_norm": [
+            0.4584,
+            0.3876,
+            0.4791,
+            0.4192
+          ],
+          "quadrant": "upper-center region"
+        }
+      ],
+      "is_golden": false,
+      "description": "Kaggle/PKU bare-PCB sample with 3 annotated missing hole anomaly(s) in lower-right quadrant, upper-center region, upper-right quadrant."
+    },
+    {
+      "id": "pku_mouse_bite_01",
+      "title": "Mouse bite (01)",
+      "category": "PKU Mouse bite",
+      "orig_defect_class": "mouse_bite",
+      "expected_defect_class": "uncertain_or_other",
+      "expected_severity": "medium",
+      "expected_disposition": "requires_human_verification",
+      "board_id": "BAT-PCBA-107",
+      "image_url": "/samples/pku_mouse_bite_01.jpg",
+      "width": 1400,
+      "height": 731,
+      "location_hint": "center-right region, lower-center region, lower-right quadrant",
+      "bboxes": [
+        {
+          "orig_label": "mouse_bite",
+          "bbox_norm": [
+            0.5003,
+            0.5757,
+            0.5099,
+            0.604
+          ],
+          "quadrant": "lower-center region"
+        },
+        {
+          "orig_label": "mouse_bite",
+          "bbox_norm": [
+            0.6658,
+            0.7945,
+            0.6744,
+            0.8209
+          ],
+          "quadrant": "lower-right quadrant"
+        },
+        {
+          "orig_label": "mouse_bite",
+          "bbox_norm": [
+            0.8553,
+            0.5599,
+            0.8635,
+            0.5801
+          ],
+          "quadrant": "center-right region"
+        }
+      ],
+      "is_golden": false,
+      "description": "Kaggle/PKU bare-PCB sample with 3 annotated mouse bite anomaly(s) in center-right region, lower-center region, lower-right quadrant."
+    },
+    {
+      "id": "pku_spur_01",
+      "title": "Spur (01)",
+      "category": "PKU Spur",
+      "orig_defect_class": "spur",
+      "expected_defect_class": "uncertain_or_other",
+      "expected_severity": "medium",
+      "expected_disposition": "requires_human_verification",
+      "board_id": "BAT-PCBA-108",
+      "image_url": "/samples/pku_spur_01.jpg",
+      "width": 1400,
+      "height": 731,
+      "location_hint": "lower-center region, lower-left quadrant",
+      "bboxes": [
+        {
+          "orig_label": "spur",
+          "bbox_norm": [
+            0.4759,
+            0.7081,
+            0.4858,
+            0.7289
+          ],
+          "quadrant": "lower-center region"
+        },
+        {
+          "orig_label": "spur",
+          "bbox_norm": [
+            0.4344,
+            0.7963,
+            0.4459,
+            0.8165
+          ],
+          "quadrant": "lower-center region"
+        },
+        {
+          "orig_label": "spur",
+          "bbox_norm": [
+            0.3138,
+            0.814,
+            0.3253,
+            0.8342
+          ],
+          "quadrant": "lower-left quadrant"
+        }
+      ],
+      "is_golden": false,
+      "description": "Kaggle/PKU bare-PCB sample with 3 annotated spur anomaly(s) in lower-center region, lower-left quadrant."
+    },
+    {
+      "id": "pku_spurious_copper_01",
+      "title": "Spurious copper (01)",
+      "category": "PKU Spurious copper",
+      "orig_defect_class": "spurious_copper",
+      "expected_defect_class": "uncertain_or_other",
+      "expected_severity": "low",
+      "expected_disposition": "requires_human_verification",
+      "board_id": "BAT-PCBA-109",
+      "image_url": "/samples/pku_spurious_copper_01.jpg",
+      "width": 1400,
+      "height": 731,
+      "location_hint": "lower-center region, lower-left quadrant, lower-right quadrant",
+      "bboxes": [
+        {
+          "orig_label": "spurious_copper",
+          "bbox_norm": [
+            0.5402,
+            0.6633,
+            0.5639,
+            0.6936
+          ],
+          "quadrant": "lower-center region"
+        },
+        {
+          "orig_label": "spurious_copper",
+          "bbox_norm": [
+            0.706,
+            0.7081,
+            0.7248,
+            0.7346
+          ],
+          "quadrant": "lower-right quadrant"
+        },
+        {
+          "orig_label": "spurious_copper",
+          "bbox_norm": [
+            0.2577,
+            0.691,
+            0.2769,
+            0.7264
+          ],
+          "quadrant": "lower-left quadrant"
+        }
+      ],
+      "is_golden": false,
+      "description": "Kaggle/PKU bare-PCB sample with 3 annotated spurious copper anomaly(s) in lower-center region, lower-left quadrant, lower-right quadrant."
+    },
+    {
+      "id": "pku_spurious_copper_02",
+      "title": "Spurious copper (04)",
+      "category": "PKU Spurious copper",
+      "orig_defect_class": "spurious_copper",
+      "expected_defect_class": "uncertain_or_other",
+      "expected_severity": "low",
+      "expected_disposition": "requires_human_verification",
+      "board_id": "BAT-PCBA-110",
+      "image_url": "/samples/pku_spurious_copper_02.jpg",
+      "width": 1400,
+      "height": 1128,
+      "location_hint": "center-left region, lower-left quadrant",
+      "bboxes": [
+        {
+          "orig_label": "spurious_copper",
+          "bbox_norm": [
+            0.2529,
+            0.8462,
+            0.288,
+            0.8726
+          ],
+          "quadrant": "lower-left quadrant"
+        },
+        {
+          "orig_label": "spurious_copper",
+          "bbox_norm": [
+            0.214,
+            0.4988,
+            0.2507,
+            0.5175
+          ],
+          "quadrant": "center-left region"
+        },
+        {
+          "orig_label": "spurious_copper",
+          "bbox_norm": [
+            0.2058,
+            0.5377,
+            0.216,
+            0.5759
+          ],
+          "quadrant": "center-left region"
+        }
+      ],
+      "is_golden": false,
+      "description": "Kaggle/PKU bare-PCB sample with 3 annotated spurious copper anomaly(s) in center-left region, lower-left quadrant."
+    },
+    {
+      "id": "golden_clean_01",
+      "title": "Golden Reference Board (01.JPG)",
+      "category": "Golden Sample (Defect-Free)",
+      "orig_defect_class": "none",
+      "expected_defect_class": "none",
+      "expected_severity": "low",
+      "expected_disposition": "pass",
+      "board_id": "BAT-PCBA-GOLD-01",
+      "image_url": "/samples/golden_clean_01.jpg",
+      "width": 1400,
+      "height": 731,
+      "location_hint": "none (clean reference board)",
+      "bboxes": [],
+      "is_golden": true,
+      "description": "Clean defect-free golden reference PCB from PKU PCB_USED for false-call and pass-candidate verification."
+    },
+    {
+      "id": "golden_clean_02",
+      "title": "Golden Reference Board (04.JPG)",
+      "category": "Golden Sample (Defect-Free)",
+      "orig_defect_class": "none",
+      "expected_defect_class": "none",
+      "expected_severity": "low",
+      "expected_disposition": "pass",
+      "board_id": "BAT-PCBA-GOLD-04",
+      "image_url": "/samples/golden_clean_02.jpg",
+      "width": 1400,
+      "height": 1128,
+      "location_hint": "none (clean reference board)",
+      "bboxes": [],
+      "is_golden": true,
+      "description": "Clean defect-free golden reference PCB from PKU PCB_USED for false-call and pass-candidate verification."
+    },
+    {
+      "id": "smt_missing_comp_01",
+      "title": "SMT Missing Component (R12)",
+      "category": "SMT Reference Card",
+      "orig_defect_class": "missing_component",
+      "expected_defect_class": "missing_component",
+      "expected_severity": "high",
+      "expected_disposition": "rework",
+      "board_id": "BAT-SMT-201",
+      "image_url": "/samples/smt_missing_comp_01.jpg",
+      "width": 1000,
+      "height": 750,
+      "location_hint": "center-right region, footprint R12",
+      "bboxes": [
+        {
+          "orig_label": "missing_component",
+          "bbox_norm": [
+            0.48,
+            0.35,
+            0.8,
+            0.58
+          ],
+          "quadrant": "center-right region, footprint R12"
+        }
+      ],
+      "is_golden": false,
+      "description": "Procedural SMT inspection test card illustrating missing component (center-right region, footprint R12)."
+    },
+    {
+      "id": "smt_polarity_err_01",
+      "title": "SMT Polarity Reversal (Diode D3)",
+      "category": "SMT Reference Card",
+      "orig_defect_class": "polarity_error",
+      "expected_defect_class": "polarity_error",
+      "expected_severity": "high",
+      "expected_disposition": "quarantine",
+      "board_id": "BAT-SMT-202",
+      "image_url": "/samples/smt_polarity_err_01.jpg",
+      "width": 1000,
+      "height": 750,
+      "location_hint": "center-right region, diode D3",
+      "bboxes": [
+        {
+          "orig_label": "polarity_error",
+          "bbox_norm": [
+            0.48,
+            0.35,
+            0.8,
+            0.58
+          ],
+          "quadrant": "center-right region, diode D3"
+        }
+      ],
+      "is_golden": false,
+      "description": "Procedural SMT inspection test card illustrating polarity error (center-right region, diode D3)."
+    },
+    {
+      "id": "smt_tombstone_01",
+      "title": "SMT Tombstoning (Cap C7)",
+      "category": "SMT Reference Card",
+      "orig_defect_class": "tombstoning",
+      "expected_defect_class": "tombstoning",
+      "expected_severity": "medium",
+      "expected_disposition": "rework",
+      "board_id": "BAT-SMT-203",
+      "image_url": "/samples/smt_tombstone_01.jpg",
+      "width": 1000,
+      "height": 750,
+      "location_hint": "center-right region, capacitor C7",
+      "bboxes": [
+        {
+          "orig_label": "tombstoning",
+          "bbox_norm": [
+            0.48,
+            0.35,
+            0.8,
+            0.58
+          ],
+          "quadrant": "center-right region, capacitor C7"
+        }
+      ],
+      "is_golden": false,
+      "description": "Procedural SMT inspection test card illustrating tombstoning (center-right region, capacitor C7)."
+    },
+    {
+      "id": "smt_comp_shift_01",
+      "title": "SMT Component Shift (R5)",
+      "category": "SMT Reference Card",
+      "orig_defect_class": "component_shift",
+      "expected_defect_class": "component_shift",
+      "expected_severity": "medium",
+      "expected_disposition": "rework",
+      "board_id": "BAT-SMT-204",
+      "image_url": "/samples/smt_comp_shift_01.jpg",
+      "width": 1000,
+      "height": 750,
+      "location_hint": "center-right region, resistor R5",
+      "bboxes": [
+        {
+          "orig_label": "component_shift",
+          "bbox_norm": [
+            0.48,
+            0.35,
+            0.8,
+            0.58
+          ],
+          "quadrant": "center-right region, resistor R5"
+        }
+      ],
+      "is_golden": false,
+      "description": "Procedural SMT inspection test card illustrating component shift (center-right region, resistor R5)."
+    }
+  ]
+}

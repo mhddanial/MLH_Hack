@@ -1,0 +1,38 @@
+{
+  "sample_id": "smt_tombstone_01",
+  "cached_at": "2026-10-31T06:29:31.335Z",
+  "model_id": "gemma-4-26b-a4b-it",
+  "prompt_version": "aoi-prompt-v1.0",
+  "prompt_sha256": "ac6cb03bb977",
+  "latency_ms": 37389,
+  "attempts": 1,
+  "result": {
+    "board_id": "BAT-SMT-203",
+    "inspection_id": "INS-20261031-262454-e_01",
+    "image_quality": "acceptable",
+    "defects": [
+      {
+        "defect_class": "tombstoning",
+        "location_hint": "center-right area, near C7",
+        "confidence": 1,
+        "severity": "medium",
+        "evidence": "Component C7 is standing upright on the left pad, leaving the right pad open.",
+        "recommended_action": "Rework component C7."
+      }
+    ],
+    "overall_disposition": "rework",
+    "visible_labels": [
+      "BOARD ID: BAT-SMT-203",
+      "REV: A",
+      "STATION: SMT-L1",
+      "INSPECTION MACRO",
+      "R10 (10k)",
+      "103",
+      "C7 (TOMBSTONED LIFTED OFF RIGHT PAD)",
+      "OPEN PAD"
+    ],
+    "notes": "No BGA/QFN packages visible; hidden joints were not assessed.",
+    "model": "gemma-4-multimodal",
+    "operator_confirmation_required": true
+  }
+}

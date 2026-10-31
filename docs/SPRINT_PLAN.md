@@ -59,12 +59,12 @@ flowchart LR
 
 ### 0.4 AI contract
 - [x] 🔴 Prompt `prompts/inspection_prompt_v1.txt` (version `aoi-prompt-v1.0`)
-- [ ] 🔴 `src/lib/config.ts`: env loading, threshold, prompt SHA, demo operators/lines
-- [ ] 🔴 `src/lib/schema.ts`: strict TypeScript + Zod runtime validator, 6-class enum, review payloads, deterministic safety rules
+- [x] 🔴 `src/lib/config.ts`: env loading, threshold, prompt SHA, demo operators/lines
+- [x] 🔴 `src/lib/schema.ts`: strict TypeScript + Zod runtime validator, 6-class enum, review payloads, deterministic safety rules
 
 ### 0.5 Sample data
-- [ ] 🔴 `scripts/prepare_samples.py`: pick 2 images per PKU class (12) + 4 clean `PCB_USED` boards (golden) + 4 procedural SMT defect cards, resize to ≤1600 px into `public/samples/`
-- [ ] 🔴 `sample_data/labels.json`: original class, mapped class, scaled bounding boxes, quadrant hint
+- [x] 🔴 `scripts/prepare_samples.py`: pick 2 images per PKU class (10) + 2 clean `PCB_USED` boards (golden) + 4 procedural SMT defect cards (16 total), resize to ≤1400 px into `public/samples/`
+- [x] 🔴 `sample_data/labels.json`: original class, mapped class, scaled bounding boxes, quadrant hint
 - [x] 🔴 `sample_data/DATA_SOURCES.md`: source, license, mapping, bare-PCB limitation
 
 **Exit criteria S0:** Next.js app initializes · prompt and schema ready · ≥16 sample images in `public/samples/` with `labels.json`.
@@ -75,50 +75,50 @@ flowchart LR
 **Goal:** Next.js Route Handler `POST /api/analyze` returns validated, guard-railed Gemma 4 JSON and creates a pending record in Supabase PostgreSQL.
 
 ### 1.1 Gemma 4 client (`src/lib/gemma.ts`)
-- [ ] 🔴 `buildPrompt()` injects metadata and threshold into the template
-- [ ] 🔴 `callGemma()`: REST `models/{GEMMA_MODEL_ID}:generateContent` with inline JPEG + prompt, `temperature 0.1`
-- [ ] 🔴 Skip `thought` parts and keep only the answer text
-- [ ] 🔴 `extractJson()`: strip code fences, take the first `{…}` block
-- [ ] 🔴 `validateInspectionResult()`: strict schema validator. Classes outside the 6 fail validation
-- [ ] 🔴 Retry **once**, sending the validation error back to the model
-- [ ] 🔴 After 2 failures: status `manual_required`. Keep the raw text and errors
-- [ ] 🔴 Distinguish `GemmaUnavailable` (network/auth/quota) from invalid output
-- [ ] 🔴 **Smoke test:** one real call with one sample image returns valid JSON *(verify `gemma-4-26b-a4b-it` works)*
+- [x] 🔴 `buildPrompt()` injects metadata and threshold into the template
+- [x] 🔴 `callGemma()`: REST `models/{GEMMA_MODEL_ID}:generateContent` with inline JPEG + prompt, `temperature 0.1`
+- [x] 🔴 Skip `thought` parts and keep only the answer text
+- [x] 🔴 `extractJson()`: strip code fences, take the first `{…}` block
+- [x] 🔴 `validateInspectionResult()`: strict schema validator. Classes outside the 6 fail validation
+- [x] 🔴 Retry **once**, sending the validation error back to the model
+- [x] 🔴 After 2 failures: status `manual_required`. Keep the raw text and errors
+- [x] 🔴 Distinguish `GemmaUnavailable` (network/auth/quota) from invalid output
+- [x] 🔴 **Smoke test:** one real call with one sample image returns valid JSON *(verified `gemma-4-26b-a4b-it` live)*
 
 ### 1.2 Safety rules (deterministic, after validation)
-- [ ] 🔴 Force `model="gemma-4-multimodal"` and `operator_confirmation_required=true`
-- [ ] 🔴 Overwrite `board_id` / `inspection_id` with the server values
-- [ ] 🔴 Any defect with confidence below the threshold sets `requires_human_verification` and adds a routing reason
-- [ ] 🔴 `image_quality ≠ acceptable` sets `requires_human_verification`
-- [ ] 🔴 AI `pass` with defects listed is flagged as inconsistent and routed
-- [ ] 🔴 Store `original_ai_disposition` separately from the routed one
+- [x] 🔴 Force `model="gemma-4-multimodal"` and `operator_confirmation_required=true`
+- [x] 🔴 Overwrite `board_id` / `inspection_id` with the server values
+- [x] 🔴 Any defect with confidence below the threshold sets `requires_human_verification` and adds a routing reason
+- [x] 🔴 `image_quality ≠ acceptable` sets `requires_human_verification`
+- [x] 🔴 AI `pass` with defects listed is flagged as inconsistent and routed
+- [x] 🔴 Store `original_ai_disposition` separately from the routed one
 
 ### 1.3 Offline fallback
-- [ ] 🔴 `AI_MODE = auto | live | offline`
-- [ ] 🔴 Every successful live call on a sample image saves `sample_data/cached_responses/<sample_id>.json` (real output, model ID, prompt version, timestamp)
-- [ ] 🔴 If the API is unavailable and a cache exists: replay it with `source="cached"` (badged in the UI)
-- [ ] 🔴 If the API is unavailable and there's no cache: `manual_required`
+- [x] 🔴 `AI_MODE = auto | live | offline`
+- [x] 🔴 Every successful live call on a sample image saves `sample_data/cached_responses/<sample_id>.json` (real output, model ID, prompt version, timestamp)
+- [x] 🔴 If the API is unavailable and a cache exists: replay it with `source="cached"` (badged in the UI)
+- [x] 🔴 If the API is unavailable and there's no cache: `manual_required`
 
 ### 1.4 Client & Server Image Pre-processing
-- [ ] 🔴 Client-side HTML5 `<canvas>` normalizes uploaded/captured images to ≤1600 px JPEG (q=0.85) so payloads fit cleanly within Vercel serverless limits
-- [ ] 🔴 SHA-256 of the image bytes computed via Web Crypto / Node `crypto` (audit trail)
-- [ ] 🟡 Brightness (mean luminance) pre-check stored as `precheck`
+- [x] 🔴 Client-side HTML5 `<canvas>` normalizes uploaded/captured images to ≤1400 px JPEG (q=0.88) so payloads fit cleanly within Vercel serverless limits
+- [x] 🔴 SHA-256 of the image bytes computed via Web Crypto / Node `crypto` (audit trail)
+- [x] 🟡 Brightness (mean luminance) pre-check stored as `precheck`
 
 ### 1.5 Storage (`src/lib/storage.ts`, Supabase PostgreSQL + Local Fallback)
-- [ ] 🔴 Supabase migration `create_aoi_inspections` applied to `public.aoi_inspections` (project `rrkafcbuhnnwnduvwluq`)
-- [ ] 🔴 Columns: id, created_at, shift, metadata fields, image_filename, image_sha256, sample_id, reference_label, precheck, ai_source, model_id, prompt_version, prompt_sha, ai_raw_text, ai_result, ai_attempts, ai_latency_ms, ai_errors, routing_reasons, original_ai_disposition, status, final_defects, defect_reviews, final_disposition, reviewer_id, reviewed_at, human_agreement, review_notes, doc_time_s, started_at
-- [ ] 🔴 Automatic local JSON/in-memory fallback (`data/local_records.json`) so offline mode continues to work if internet drops
-- [ ] 🔴 Inspection ID format `INS-YYYYMMDD-HHMMSS-xxxx`
-- [ ] 🔴 Shift derived from the timestamp (A 07–15, B 15–23, C 23–07)
+- [x] 🔴 Supabase migration `create_aoi_inspections` applied to `public.aoi_inspections` (project `rrkafcbuhnnwnduvwluq`)
+- [x] 🔴 Columns: id, created_at, shift, metadata fields, image_filename, image_sha256, sample_id, reference_label, precheck, ai_source, model_id, prompt_version, prompt_sha, ai_raw_text, ai_result, ai_attempts, ai_latency_ms, ai_errors, routing_reasons, original_ai_disposition, status, final_defects, defect_reviews, final_disposition, reviewer_id, reviewed_at, human_agreement, review_notes, doc_time_s, started_at
+- [x] 🔴 Automatic local JSON/in-memory fallback (`data/local_records.json`) so offline mode continues to work if internet drops
+- [x] 🔴 Inspection ID format `INS-YYYYMMDD-HHMMSS-xxxx`
+- [x] 🔴 Shift derived from the timestamp (A 07–15, B 15–23, C 23–07)
 
 ### 1.6 Next.js Route Handlers (`src/app/api/*/route.ts`, Vercel-ready)
-- [ ] 🔴 `GET /api/config`: model, prompt version, threshold, classes, operators, lines, types, AI mode, Supabase status
-- [ ] 🔴 `GET /api/samples`: gallery list (+ reference label for evaluation mode)
-- [ ] 🔴 `POST /api/analyze`: creates a `pending_review` record in Supabase (and local mirror) and returns the AI outcome
-- [ ] 🔴 `POST /api/inspections/[id]/review`: human decision (see S2.4 rules)
-- [ ] 🔴 `GET /api/inspections`, `GET /api/inspections/[id]`
-- [ ] 🔴 `GET /api/export/csv`, `GET /api/export/json`
-- [ ] 🔴 `GET /api/stats`
+- [x] 🔴 `GET /api/config`: model, prompt version, threshold, classes, operators, lines, types, AI mode, Supabase status
+- [x] 🔴 `GET /api/samples`: gallery list (+ reference label for evaluation mode)
+- [x] 🔴 `POST /api/analyze`: creates a `pending_review` record in Supabase (and local mirror) and returns the AI outcome
+- [x] 🔴 `POST /api/inspections/[id]/review`: human decision (see S2.4 rules)
+- [x] 🔴 `GET /api/inspections`, `GET /api/inspections/[id]`
+- [x] 🔴 `GET /api/export/csv`, `GET /api/export/json`
+- [x] 🔴 `GET /api/stats`
 
 **Exit criteria S1:** a request to `/api/analyze` with a sample image returns valid JSON from **live Gemma 4** and a pending row exists in **Supabase PostgreSQL** (`public.aoi_inspections`). Invalid output → retry → manual path tested with a forced bad string.
 
@@ -129,56 +129,56 @@ flowchart LR
 
 ### 2.1 Layout and design system (`docs/DESIGN.md` — IBM Carbon Design System)
 - [x] 🔴 IBM Carbon Design System aesthetic (`docs/DESIGN.md`): pure white canvas (`#ffffff`), light gray surface (`#f4f4f4`), charcoal ink (`#161616`), single assertive IBM Blue accent (`#0f62fe`), flat-square `0px` corners (`rounded-none`), 1px `#e0e0e0` hairlines, no drop shadows, `IBM Plex Sans` (`300` display / `400` body with `0.16px` tracking / `600` emphasis), `>=48px` touch targets, and `#161616` inverted charcoal footer
-- [ ] 🔴 Persistent banner: **"AI assistance only. Final quality disposition requires human verification."**
-- [ ] 🔴 Top tabs: **Inspect · Records · Dashboard**
-- [ ] 🔴 Stepper: Capture → Analyze → Review → Confirm → Export
-- [ ] 🔴 Status chips with distinct Carbon semantic colour **and** text: `AI-SUGGESTED` (`#f1c21b` warning) · `HUMAN-CONFIRMED` (`#24a148` success) · `REJECTED` (`#da1e28` error) · `ESCALATED` (`#f1c21b`) · `PENDING REVIEW` (`#e0e0e0`) · `MANUAL ENTRY` (`#0f62fe` info)
-- [ ] 🟡 Inverted charcoal footer (`#161616`): model ID · prompt version · threshold · AI mode · Supabase status
+- [x] 🔴 Persistent banner: **"AI assistance only. Final quality disposition requires human verification."**
+- [x] 🔴 Top tabs: **Inspect · Records · Dashboard**
+- [x] 🔴 Stepper: Capture → Analyze → Review → Confirm → Export
+- [x] 🔴 Status chips with distinct Carbon semantic colour **and** text: `AI-SUGGESTED` (`#f1c21b` warning) · `HUMAN-CONFIRMED` (`#24a148` success) · `REJECTED` (`#da1e28` error) · `ESCALATED` (`#f1c21b`) · `PENDING REVIEW` (`#e0e0e0`) · `MANUAL ENTRY` (`#0f62fe` info)
+- [x] 🟡 Inverted charcoal footer (`#161616`): model ID · prompt version · threshold · AI mode · Supabase status
 
 ### 2.2 Step 1: Capture
-- [ ] 🔴 **Sample gallery first** (thumbnails, works offline)
-- [ ] 🔴 File upload (`accept="image/*"`)
-- [ ] 🔴 Camera: `getUserMedia` live preview + capture button
-- [ ] 🔴 Camera fallback: `<input capture="environment">` if getUserMedia fails
-- [ ] 🔴 Image preview + start doc-time timer on selection
-- [ ] 🔴 Privacy reminder: "Do not upload confidential customer boards"
+- [x] 🔴 **Sample gallery first** (thumbnails, works offline)
+- [x] 🔴 File upload (`accept="image/*"`)
+- [x] 🔴 Camera: `getUserMedia` live preview + capture button
+- [x] 🔴 Camera fallback: `<input capture="environment">` if getUserMedia fails
+- [x] 🔴 Image preview + start doc-time timer on selection
+- [x] 🔴 Privacy reminder: "Do not upload confidential customer boards"
 
 ### 2.3 Step 2: Metadata and analyze
-- [ ] 🔴 Board ID (pre-filled for samples), revision, line/station select, operator select, inspection type select
-- [ ] 🔴 Big **Analyze with Gemma 4** button, disabled until image + required fields are filled
-- [ ] 🔴 Loading state with elapsed seconds (expected 10–20 s)
-- [ ] 🔴 Error state: offers **Retry** or **Manual entry**
+- [x] 🔴 Board ID (pre-filled for samples), revision, line/station select, operator select, inspection type select
+- [x] 🔴 Big **Analyze with Gemma 4** button, disabled until image + required fields are filled
+- [x] 🔴 Loading state with elapsed seconds (expected 10–20 s)
+- [x] 🔴 Error state: offers **Retry** or **Manual entry**
 
 ### 2.4 Step 3: Review (AI result card)
-- [ ] 🔴 Header: `AI-SUGGESTED` chip, source badge (`LIVE GEMMA 4` / `CACHED GEMMA 4 OUTPUT` / `MANUAL`), latency, attempts
-- [ ] 🔴 Image quality, suggested disposition, routing reasons (why human verification is needed)
-- [ ] 🔴 Per defect: class, location hint, **confidence bar + number** (red below the threshold), severity, evidence, recommended action
-- [ ] 🔴 Per-defect buttons: **Accept · Edit · Reject · Escalate**
-- [ ] 🔴 Edit mode: class dropdown (6 classes only), severity, location
-- [ ] 🔴 **+ Add missed defect** (human-found, counts toward recall)
-- [ ] 🔴 "No defects suggested" state: explicit message + human must still confirm
-- [ ] 🟡 Visible labels (OCR) chips and model notes
-- [ ] 🟡 Collapsible raw JSON (transparency for judges)
-- [ ] 🟢 X-ray note: "Hidden joints (BGA/QFN voids, HiP) not assessed; requires X-ray"
+- [x] 🔴 Header: `AI-SUGGESTED` chip, source badge (`LIVE GEMMA 4` / `CACHED GEMMA 4` / `MANUAL`), latency, attempts
+- [x] 🔴 Image quality, suggested disposition, routing reasons (why human verification is needed)
+- [x] 🔴 Per defect: class, location hint, **confidence bar + number** (red below the threshold), severity, evidence, recommended action
+- [x] 🔴 Per-defect buttons: **Accept · Edit · Reject · Escalate**
+- [x] 🔴 Edit mode: class dropdown (6 classes only), severity, location
+- [x] 🔴 **+ Add missed defect** (human-found, counts toward recall)
+- [x] 🔴 "No defects suggested" state: explicit message + human must still confirm
+- [x] 🟡 Visible labels (OCR) chips and model notes
+- [x] 🟡 Collapsible raw JSON (transparency for judges)
+- [x] 🟢 X-ray note: "Hidden joints (BGA/QFN voids, HiP) not assessed; requires X-ray"
 
 ### 2.5 Step 4: Confirm
-- [ ] 🔴 Final disposition selector (human only): `pass · rework · quarantine · escalate`
-- [ ] 🔴 Reviewer ID (defaults to operator) + notes
-- [ ] 🔴 Confirm is blocked until every AI defect has an action and a disposition is chosen
-- [ ] 🔴 Server computes `human_agreement`:
+- [x] 🔴 Final disposition selector (human only): `pass · rework · quarantine · escalate`
+- [x] 🔴 Reviewer ID (defaults to operator) + notes
+- [x] 🔴 Confirm is blocked until every AI defect has an action and a disposition is chosen
+- [x] 🔴 Server computes `human_agreement`:
   - `agree`: all accepted, nothing added
   - `disagree`: all rejected, or AI found nothing and the human added defects
   - `partial`: anything else
-- [ ] 🔴 Save → success screen with a `HUMAN-CONFIRMED` chip + record ID + doc time
+- [x] 🔴 Save → success screen with a `HUMAN-CONFIRMED` chip + record ID + doc time
 
 ### 2.6 Step 5: Export (from the success screen)
-- [ ] 🔴 Buttons: Download this record (JSON) · Go to Records · **New inspection**
+- [x] 🔴 Buttons: Download this record (JSON) · Go to Records · **New inspection**
 
 ### 2.7 Manual entry path
-- [ ] 🔴 Shown when AI is unavailable or invalid after retry. Same review UI with an empty AI list and `MANUAL ENTRY` badge
-- [ ] 🔴 Record saved with `ai_source="manual"` + error reason
+- [x] 🔴 Shown when AI is unavailable or invalid after retry. Same review UI with an empty AI list and `MANUAL ENTRY` badge
+- [x] 🔴 Record saved with `ai_source="manual"` + error reason
 
-**Exit criteria S2:** a sample image runs end-to-end in the browser with a live Gemma 4 call, and the confirmed record appears in SQLite with AI output and the human decision stored separately.
+**Exit criteria S2:** a sample image runs end-to-end in the browser with a live Gemma 4 call, and the confirmed record appears in Supabase PostgreSQL (`public.aoi_inspections`) with AI output and the human decision stored separately.
 
 ---
 
@@ -186,26 +186,26 @@ flowchart LR
 **Goal:** structured data visibly enables DMAIC Measure and Analyze.
 
 ### 3.1 Records tab
-- [ ] 🔴 Table: time, inspection ID, board, operator, line, AI suggestion, final disposition, status chip, agreement
-- [ ] 🔴 Click a row to see the detail: image, AI JSON (original), human decision, audit fields (hash, model, prompt version)
-- [ ] 🟡 Filter: status (pending / confirmed / escalated)
-- [ ] 🟡 Resume a pending review from the record
+- [x] 🔴 Table: time, inspection ID, board, operator, line, AI suggestion, final disposition, status chip, agreement
+- [x] 🔴 Click a row to see the detail: image, AI JSON (original), human decision, audit fields (hash, model, prompt version)
+- [x] 🟡 Filter: status (pending / confirmed / escalated)
+- [x] 🟡 Resume a pending review from the record
 
 ### 3.2 Export
-- [ ] 🔴 CSV: **one row per defect** (Pareto-ready); inspections without defects get one row. Columns: inspection_id, created_at, shift, board_id, board_revision, line_station, operator_id, inspection_type, image_filename, image_sha256, model_id, prompt_version, ai_source, ai_overall_disposition, ai_defect_class, ai_confidence, ai_severity, ai_location_hint, ai_evidence, human_action, final_defect_class, final_severity, final_disposition, human_agreement, reviewer_id, reviewed_at, doc_time_s, status
-- [ ] 🔴 JSON: full records including the original AI output and the human decision
-- [ ] 🔴 Export buttons on the Records and Dashboard tabs
+- [x] 🔴 CSV: **one row per defect** (Pareto-ready); inspections without defects get one row. Columns: inspection_id, created_at, shift, board_id, board_revision, line_station, operator_id, inspection_type, image_filename, image_sha256, model_id, prompt_version, ai_source, ai_overall_disposition, ai_defect_class, ai_confidence, ai_severity, ai_location_hint, ai_evidence, human_action, final_defect_class, final_severity, final_disposition, human_agreement, reviewer_id, reviewed_at, doc_time_s, status
+- [x] 🔴 JSON: full records including the original AI output and the human decision
+- [x] 🔴 Export buttons on the Records and Dashboard tabs
 
 ### 3.3 Dashboard (CSS bars, no chart library, so it works offline)
-- [ ] 🔴 KPI tiles: total inspections · **pending human reviews** · confirmed · escalated
-- [ ] 🔴 **Defect distribution** by confirmed class (Pareto, sorted)
-- [ ] 🔴 AI quality: precision (accepted / reviewed flags), **false-call rate** (rejected / flags), recall proxy, agreement rate
-- [ ] 🔴 Traceability completeness %
-- [ ] 🟡 Average documentation time (s)
-- [ ] 🟡 Breakdown by severity, line, operator, shift, board
-- [ ] 🟡 Final disposition distribution
-- [ ] 🟢 AI vs human side-by-side class counts
-- [ ] 🔴 Disclaimer under the KPIs: "Demo sample set: not a factory-wide capability study"
+- [x] 🔴 KPI tiles: total inspections · **pending human reviews** · confirmed · escalated
+- [x] 🔴 **Defect distribution** by confirmed class (Pareto, sorted)
+- [x] 🔴 AI quality: precision (accepted / reviewed flags), **false-call rate** (rejected / flags), recall proxy, agreement rate
+- [x] 🔴 Traceability completeness %
+- [x] 🟡 Average documentation time (s)
+- [x] 🟡 Breakdown by severity, line, operator, shift, board
+- [x] 🟡 Final disposition distribution
+- [x] 🟢 AI vs human side-by-side class counts
+- [x] 🔴 Disclaimer under the KPIs: "Demo sample set: not a factory-wide capability study"
 
 **Exit criteria S3:** after 3+ confirmed records, CSV opens in Excel with correct columns, JSON contains AI + human data, and the dashboard numbers match the records.
 

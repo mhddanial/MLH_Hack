@@ -1,0 +1,20 @@
+{
+  "sample_id": "golden_clean_01",
+  "cached_at": "2026-10-31T06:29:54.869Z",
+  "model_id": "gemma-4-26b-a4b-it",
+  "prompt_version": "aoi-prompt-v1.0",
+  "prompt_sha256": "ac6cb03bb977",
+  "latency_ms": 22865,
+  "attempts": 1,
+  "result": {
+    "board_id": "BAT-PCBA-GOLD-01",
+    "inspection_id": "INS-20261031-358971-n_01",
+    "image_quality": "acceptable",
+    "defects": [],
+    "overall_disposition": "pass",
+    "visible_labels": [],
+    "notes": "The board is an unpopulated bare PCB. No component-related defects (missing_component, polarity_error, tombstoning, component_shift) can be assessed. Copper traces and solder pads appear intact with no visible solder bridges or trace anomalies.",
+    "model": "gemma-4-multimodal",
+    "operator_confirmation_required": true
+  }
+}

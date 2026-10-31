@@ -7,16 +7,16 @@
 
 | # | Criterion | How to verify | Status |
 |---|---|---|---|
-| D1 | 🔴 A user can **select or capture** a PCB image | Pick a gallery image; upload a file; camera or `<input capture>` on a phone | [ ] |
-| D2 | 🔴 The app **sends it to Gemma 4** | Network log / server log shows a `generateContent` call to the `gemma-4-*` model; record has `ai_source=live` | [ ] |
-| D3 | 🔴 Gemma 4 returns **valid structured JSON** | Strict schema validation passes in Next.js API route; raw JSON visible in the SPA UI; JSON-valid rate in EVALUATION.md | [ ] |
-| D4 | 🔴 The UI shows the **AI-suggested** result | Card shows the `AI-SUGGESTED` chip, class, location, confidence, severity, evidence, action | [ ] |
-| D5 | 🔴 Inspector can **confirm, edit, reject, or escalate** | Each of the 4 actions exercised at least once and stored per defect | [ ] |
-| D6 | 🔴 The **final record is saved** | Row in Supabase PostgreSQL (`public.aoi_inspections`) + local fallback with original AI output + human decision + agreement + audit fields | [ ] |
-| D7 | 🔴 Record **exports as CSV and JSON** | Both downloads open correctly (CSV in Excel/Sheets) | [ ] |
-| D8 | 🔴 **Dashboard** shows basic stats | Inspection count, defect distribution, pending reviews match the records | [ ] |
-| D9 | 🔴 Repo contains **source, license, README, sample data, prompt, setup instructions** | Fresh clone + README steps → app runs | [ ] |
-| D10 | 🔴 **Live demo runs on preloaded images** without a factory environment | Works with Wi-Fi off (`AI_MODE=offline` or auto fallback using cached Gemma output) | [ ] |
+| D1 | 🔴 A user can **select or capture** a PCB image | Pick a gallery image; upload a file; camera or `<input capture>` on a phone | [x] |
+| D2 | 🔴 The app **sends it to Gemma 4** | Network log / server log shows a `generateContent` call to the `gemma-4-*` model; record has `ai_source=live` | [x] |
+| D3 | 🔴 Gemma 4 returns **valid structured JSON** | Strict schema validation passes in Next.js API route; raw JSON visible in the SPA UI; JSON-valid rate in EVALUATION.md | [x] |
+| D4 | 🔴 The UI shows the **AI-suggested** result | Card shows the `AI-SUGGESTED` chip, class, location, confidence, severity, evidence, action | [x] |
+| D5 | 🔴 Inspector can **confirm, edit, reject, or escalate** | Each of the 4 actions exercised at least once and stored per defect | [x] |
+| D6 | 🔴 The **final record is saved** | Row in Supabase PostgreSQL (`public.aoi_inspections`) + local fallback with original AI output + human decision + agreement + audit fields | [x] |
+| D7 | 🔴 Record **exports as CSV and JSON** | Both downloads open correctly (CSV in Excel/Sheets) | [x] |
+| D8 | 🔴 **Dashboard** shows basic stats | Inspection count, defect distribution, pending reviews match the records | [x] |
+| D9 | 🔴 Repo contains **source, license, README, sample data, prompt, setup instructions** | Fresh clone + README steps → app runs | [x] |
+| D10 | 🔴 **Live demo runs on preloaded images** without a factory environment | Works with Wi-Fi off (`AI_MODE=offline` or auto fallback using cached Gemma output) | [x] |
 
 ## 2. Hackathon submission Definition of Done
 
@@ -36,17 +36,17 @@
 
 | # | Rule | Verified by | Status |
 |---|---|---|---|
-| S1 | 🔴 Banner "AI assistance only. Final quality disposition requires human verification." visible on every screen | Visual check | [ ] |
-| S2 | 🔴 AI output is labelled **AI-suggested** until confirmed | Visual check | [ ] |
-| S3 | 🔴 The AI can never set a final disposition. The final value comes only from the human review endpoint | Code review + API test (analyze never writes `final_disposition`) | [ ] |
-| S4 | 🔴 `operator_confirmation_required` is always `true` in stored output | DB check | [ ] |
-| S5 | 🔴 Confidence below the threshold is auto-routed to `requires_human_verification` with a visible reason | Test with a low-confidence result | [ ] |
-| S6 | 🔴 Only the 6 classes are accepted from the AI and in edit dropdowns | Forced invalid-class test → retry/manual | [ ] |
-| S7 | 🔴 Invalid JSON → retry once → manual entry | Forced bad-output test | [ ] |
-| S8 | 🔴 Original AI output and human decision are stored separately, with an agree/partial/disagree flag | DB / JSON export check | [ ] |
-| S9 | 🔴 Hidden defects (BGA voids, HiP) stated as out of scope, X-ray required | Prompt + README + UI note | [ ] |
-| S10 | 🔴 Each record stores model ID, prompt version + SHA, image SHA-256/filename, timestamp, human decision | DB check (traceability 100%) | [ ] |
-| S11 | 🔴 No accuracy claims beyond the measured demo numbers | README review | [ ] |
+| S1 | 🔴 Banner "AI assistance only. Final quality disposition requires human verification." visible on every screen | Visual check | [x] |
+| S2 | 🔴 AI output is labelled **AI-suggested** until confirmed | Visual check | [x] |
+| S3 | 🔴 The AI can never set a final disposition. The final value comes only from the human review endpoint | Code review + API test (analyze never writes `final_disposition`) | [x] |
+| S4 | 🔴 `operator_confirmation_required` is always `true` in stored output | DB check | [x] |
+| S5 | 🔴 Confidence below the threshold is auto-routed to `requires_human_verification` with a visible reason | Test with a low-confidence result | [x] |
+| S6 | 🔴 Only the 6 classes are accepted from the AI and in edit dropdowns | Forced invalid-class test → retry/manual | [x] |
+| S7 | 🔴 Invalid JSON → retry once → manual entry | Forced bad-output test | [x] |
+| S8 | 🔴 Original AI output and human decision are stored separately, with an agree/partial/disagree flag | DB / JSON export check | [x] |
+| S9 | 🔴 Hidden defects (BGA voids, HiP) stated as out of scope, X-ray required | Prompt + README + UI note | [x] |
+| S10 | 🔴 Each record stores model ID, prompt version + SHA, image SHA-256/filename, timestamp, human decision | DB check (traceability 100%) | [x] |
+| S11 | 🔴 No accuracy claims beyond the measured demo numbers | README review | [x] |
 
 ## 4. Sprint-level Definition of Done
 

@@ -11,7 +11,7 @@ INSPECTION CONTEXT (entered by the operator; copy board_id and inspection_id exa
 - inspection_type: {inspection_type}
 
 ALLOWED DEFECT CLASSES (use ONLY these exact strings)
-- missing_component: a component footprint is visible (bare pads / solder lands, silkscreen outline) but the part is absent.
+- missing_component: on a populated SMT assembly, a specific component footprint (bare pads / solder lands, silkscreen outline) is empty while surrounding components are mounted. (Note: if the entire board is an unpopulated bare PCB with zero components mounted anywhere, do NOT report bare footprints as missing_component; instead inspect the copper traces for solder_bridge / copper shorts or uncertain_or_other trace anomalies.)
 - solder_bridge: solder or conductive copper visibly connects two adjacent pads, leads or traces that should be electrically separate (a short).
 - polarity_error: a polarized part (diode, LED, electrolytic or tantalum capacitor, IC) has its marking (stripe, dot, notch, pin-1 bevel) opposite to the silkscreen polarity mark.
 - tombstoning: a two-terminal chip component is lifted or standing upright on one end, attached to only one pad.
