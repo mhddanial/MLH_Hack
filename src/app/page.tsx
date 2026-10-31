@@ -20,6 +20,7 @@ import {
   Layers,
   Plus,
   RefreshCw,
+  Settings2,
   ShieldAlert,
   Sparkles,
   Trash2,
@@ -186,48 +187,236 @@ interface DashboardStats {
   by_shift: Record<string, number>;
 }
 
+// ============================================================================
+// NATURAL HUMAN-READABLE LABELS & FORMATTERS
+// ============================================================================
+
 const DEFECT_LABELS: Record<DefectClass, string> = {
-  missing_component: "Missing component",
-  solder_bridge: "Solder bridge / short",
-  polarity_error: "Polarity / orientation error",
-  tombstoning: "Tombstoning (lifted chip)",
-  component_shift: "Component shift / misalignment",
-  uncertain_or_other: "Uncertain or other surface anomaly",
+  missing_component: "Missing Component",
+  solder_bridge: "Solder Bridge / Short",
+  polarity_error: "Wrong Polarity / Orientation",
+  tombstoning: "Tombstoning (Lifted Chip)",
+  component_shift: "Misaligned / Shifted Component",
+  uncertain_or_other: "Surface / Copper Trace Anomaly",
+};
+
+const DEFECT_DESCRIPTIONS: Record<DefectClass, string> = {
+  missing_component: "Empty solder pad where a component should be mounted",
+  solder_bridge: "Unintended solder or copper joining adjacent pads or pins",
+  polarity_error: "Diode, capacitor, or IC mounted in reverse orientation",
+  tombstoning: "Small chip component lifted vertically off one pad",
+  component_shift: "Component skewed, rotated, or shifted off its solder pads",
+  uncertain_or_other: "Open copper trace, pinhole, copper spur, or ambiguous surface mark",
+};
+
+const SEVERITY_LABELS: Record<Severity, string> = {
+  high: "High Priority",
+  medium: "Medium Priority",
+  low: "Low Priority",
 };
 
 const DISPOSITION_INFO: Record<
   FinalDisposition,
-  { label: string; desc: string; borderColor: string; bgColor: string; textColor: string }
+  {
+    shortLabel: string;
+    label: string;
+    desc: string;
+    borderColor: string;
+    bgColor: string;
+    textColor: string;
+    badgeBg: string;
+    badgeText: string;
+  }
 > = {
   pass: {
-    label: "Pass (release to next station)",
-    desc: "Board meets visible IPC-A-610 criteria; no active defects remain.",
+    shortLabel: "Pass",
+    label: "Pass — Release Board",
+    desc: "Board meets visible quality criteria; release to the next station.",
     borderColor: "border-[#24a148]",
     bgColor: "bg-[#24a148]",
     textColor: "text-[#ffffff]",
+    badgeBg: "bg-[#24a148]",
+    badgeText: "text-[#ffffff]",
   },
   rework: {
-    label: "Rework (route to touch-up bench)",
-    desc: "Visible solder or placement defect requires operator rework and re-inspection.",
+    shortLabel: "Send to Rework",
+    label: "Send to Rework Bench",
+    desc: "Visible solder or placement issue that can be repaired by touch-up.",
     borderColor: "border-[#0f62fe]",
     bgColor: "bg-[#0f62fe]",
     textColor: "text-[#ffffff]",
+    badgeBg: "bg-[#0f62fe]",
+    badgeText: "text-[#ffffff]",
   },
   quarantine: {
-    label: "Quarantine (hold lot / MRB)",
-    desc: "Critical defect or bare-board anomaly; isolate board in Material Review Board cage.",
+    shortLabel: "Quarantine",
+    label: "Quarantine Board (Hold)",
+    desc: "Critical defect or board damage; isolate in the hold area for review.",
     borderColor: "border-[#da1e28]",
     bgColor: "bg-[#da1e28]",
     textColor: "text-[#ffffff]",
+    badgeBg: "bg-[#da1e28]",
+    badgeText: "text-[#ffffff]",
   },
   escalate: {
-    label: "Escalate (QA engineer / X-ray)",
-    desc: "Ambiguous anomaly or suspected hidden joint; escalate to Senior QA or X-ray.",
+    shortLabel: "Escalate to QA",
+    label: "Escalate to Senior QA / X-Ray",
+    desc: "Uncertain surface mark or suspected hidden joint needing senior QA or X-ray.",
     borderColor: "border-[#f1c21b]",
     bgColor: "bg-[#f1c21b]",
     textColor: "text-[#161616]",
+    badgeBg: "bg-[#f1c21b]",
+    badgeText: "text-[#161616]",
   },
 };
+
+function formatDefectClass(cls: string | null | undefined): string {
+  if (!cls || cls === "none" || cls === "clean") return "Clean Reference (No Defects)";
+  if (cls in DEFECT_LABELS) return DEFECT_LABELS[cls as DefectClass];
+  return cls
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatOrigSubcategory(orig: string | null | undefined): string {
+  if (!orig) return "";
+  const map: Record<string, string> = {
+    Short: "Copper Short / Bridge",
+    Open_circuit: "Broken Copper Trace",
+    Mouse_bite: "Copper Edge Notch",
+    Spur: "Copper Protrusion",
+    Missing_hole: "Unpunched Via / Drill Hole",
+    Spurious_copper: "Excess Copper Residue",
+    Clean: "Clean Reference Board",
+  };
+  return map[orig] || orig.replace(/_/g, " ");
+}
+
+function formatLineStation(line: string | null | undefined): string {
+  if (!line) return "Line 1 · Post-Reflow";
+  const map: Record<string, string> = {
+    "Line-1-PostReflow": "Line 1 · Post-Reflow Station",
+    "Line-2-FirstArticle": "Line 2 · First-Article Bench",
+    "SMK-Lab-Bench-A": "SMK Training Lab · Bench A",
+    "Rework-Cell-01": "Rework & Touch-Up Cell 1",
+    "SMT-L1 / AOI-Lite-1": "Line 1 · Post-Reflow Station",
+    "SMT-L2 / AOI-Lite-2": "Line 2 · First-Article Bench",
+  };
+  return map[line] || line.replace(/-/g, " · ");
+}
+
+function formatInspectionStage(stage: string | null | undefined): string {
+  if (!stage) return "Post-Reflow Inspection";
+  const map: Record<string, string> = {
+    post_reflow: "Post-Reflow Soldering Check",
+    first_article: "First-Article Setup Check",
+    rework_verification: "Post-Rework Verification",
+    smk_lab_training: "SMK Student Lab Practice",
+  };
+  return (
+    map[stage] ||
+    stage
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+  );
+}
+
+function formatOperatorName(op: string | null | undefined): string {
+  if (!op) return "Unassigned Inspector";
+  // e.g. "OP-BTM-01 (Siti - Line 1)" -> "Siti (Line 1)"
+  const match = op.match(/\(([^)]+)\)/);
+  if (match) {
+    return match[1].replace(" - ", " · ");
+  }
+  return op;
+}
+
+function formatDispositionLabel(disp: string | null | undefined): string {
+  if (!disp) return "Needs Operator Review";
+  const d = disp.toLowerCase();
+  if (d in DISPOSITION_INFO) {
+    return DISPOSITION_INFO[d as FinalDisposition].shortLabel;
+  }
+  if (d === "requires_human_verification") return "Closer Inspection Needed";
+  if (d === "manual_entry" || d === "manual") return "Manual Inspection";
+  return disp.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatStatusBadge(status: InspectionRecord["status"]): {
+  label: string;
+  bg: string;
+  text: string;
+} {
+  switch (status) {
+    case "confirmed":
+      return { label: "Verified", bg: "bg-[#24a148]", text: "text-[#ffffff]" };
+    case "escalated":
+      return { label: "Escalated to QA", bg: "bg-[#f1c21b]", text: "text-[#161616]" };
+    case "manual_required":
+      return { label: "Manual Entry", bg: "bg-[#0f62fe]", text: "text-[#ffffff]" };
+    case "pending_review":
+    default:
+      return { label: "Needs Review", bg: "bg-[#f1c21b]", text: "text-[#161616]" };
+  }
+}
+
+function formatAgreementLabel(agreement: InspectionRecord["human_agreement"]): string {
+  if (!agreement) return "Waiting for Sign-Off";
+  switch (agreement) {
+    case "agree":
+      return "Confirmed AI Finding";
+    case "partial":
+      return "Adjusted by Operator";
+    case "disagree":
+      return "Overridden by Operator";
+    default:
+      return "Waiting for Sign-Off";
+  }
+}
+
+function formatAiSourceLabel(source: string, latencyMs?: number): string {
+  if (source === "live_gemma" || source === "live") {
+    const sec = latencyMs ? ` (${(latencyMs / 1000).toFixed(1)}s)` : "";
+    return `Live AI Check${sec}`;
+  }
+  if (source === "cached_sample" || source === "cached") {
+    return "Instant Reference Sample";
+  }
+  return "Manual Inspector Entry";
+}
+
+function formatFriendlyDateTime(iso: string): { time: string; date: string } {
+  try {
+    const d = new Date(iso);
+    return {
+      time: d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      date: d.toLocaleDateString([], { month: "short", day: "numeric" }),
+    };
+  } catch {
+    return { time: "—", date: "—" };
+  }
+}
+
+function summarizeRecordFindings(rec: InspectionRecord): string {
+  const finalList = rec.final_defects;
+  if (finalList && finalList.length > 0) {
+    const first = formatDefectClass(finalList[0].defect_class);
+    return finalList.length === 1
+      ? `1 issue: ${first}`
+      : `${finalList.length} issues (${first} +${finalList.length - 1})`;
+  }
+  if (rec.status === "confirmed" && (!finalList || finalList.length === 0)) {
+    return "No issues found (Clean board)";
+  }
+  const aiList = rec.ai_result?.defects || [];
+  if (aiList.length > 0) {
+    const first = formatDefectClass(aiList[0].defect_class);
+    return aiList.length === 1
+      ? `1 flagged: ${first}`
+      : `${aiList.length} flagged (${first} +${aiList.length - 1})`;
+  }
+  return "No visible issues flagged";
+}
 
 async function computeSha256Hex(dataUrl: string): Promise<string> {
   try {
@@ -258,7 +447,7 @@ export default function AOILiteBatamApp() {
 
   // Step 1: Capture / Image Source
   const [captureMode, setCaptureMode] = useState<"sample" | "upload" | "camera">("sample");
-  const [selectedSampleId, setSelectedSampleId] = useState<string>("pku_short_01");
+  const [selectedSampleId, setSelectedSampleId] = useState<string>("smt_missing_comp_01");
   const [uploadedDataUrl, setUploadedDataUrl] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [imageSha256, setImageSha256] = useState<string>("");
@@ -275,8 +464,9 @@ export default function AOILiteBatamApp() {
   const [cameraActive, setCameraActive] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
-  // Step 2: Metadata & Analyze
-  const [boardId, setBoardId] = useState<string>("BAT-PCBA-101");
+  // Step 2: Station & Board Details (compact bar by default, expandable)
+  const [showStationEditor, setShowStationEditor] = useState<boolean>(false);
+  const [boardId, setBoardId] = useState<string>("BAT-SMT-201");
   const [boardRevision, setBoardRevision] = useState<string>("A");
   const [lineStation, setLineStation] = useState<string>("Line-1-PostReflow");
   const [operatorId, setOperatorId] = useState<string>("OP-BTM-01 (Siti - Line 1)");
@@ -289,6 +479,7 @@ export default function AOILiteBatamApp() {
   const [analyzeElapsedMs, setAnalyzeElapsedMs] = useState<number>(0);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const [currentRecord, setCurrentRecord] = useState<InspectionRecord | null>(null);
+  const [showTechDetails, setShowTechDetails] = useState<boolean>(false);
   const [showRawJson, setShowRawJson] = useState<boolean>(false);
 
   // Step 3 & 4: Human-in-the-loop review state
@@ -302,6 +493,10 @@ export default function AOILiteBatamApp() {
   // Records tab filter & detail drawer
   const [recordStatusFilter, setRecordStatusFilter] = useState<string>("all");
   const [selectedRecordDetail, setSelectedRecordDetail] = useState<InspectionRecord | null>(null);
+  const [showDrawerTechAudit, setShowDrawerTechAudit] = useState<boolean>(false);
+
+  // Analytics tab collapsible DMAIC methodology
+  const [showDmaicDetails, setShowDmaicDetails] = useState<boolean>(false);
 
   // Load initial config, samples, records, stats
   const fetchAllData = useCallback(async () => {
@@ -366,7 +561,7 @@ export default function AOILiteBatamApp() {
 
   // Selected sample object
   const selectedSample = useMemo(
-    () => samples.find((s) => s.id === selectedSampleId) || null,
+    () => samples.find((s) => s.id === selectedSampleId) || samples[0] || null,
     [samples, selectedSampleId]
   );
 
@@ -427,7 +622,7 @@ export default function AOILiteBatamApp() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setCameraError(
-        `Browser camera stream unavailable (${msg}). Use the mobile camera / file upload button below.`
+        `Live camera preview is unavailable on this device (${msg}). Use the mobile camera / photo picker button below.`
       );
     }
   };
@@ -442,7 +637,7 @@ export default function AOILiteBatamApp() {
       img.onerror = () => reject(new Error("Failed to decode image"));
     });
 
-    const maxSide = config?.confidence_threshold ? 1400 : 1400;
+    const maxSide = 1400;
     let w = img.naturalWidth;
     let h = img.naturalHeight;
     if (Math.max(w, h) > maxSide) {
@@ -458,7 +653,6 @@ export default function AOILiteBatamApp() {
     if (!ctx) return;
     ctx.drawImage(img, 0, 0, w, h);
 
-    // Compute mean brightness
     const imgData = ctx.getImageData(0, 0, w, h).data;
     let sumLum = 0;
     const step = 16;
@@ -521,8 +715,6 @@ export default function AOILiteBatamApp() {
 
     const initialReviews: DefectReviewState[] = aiDefects.map((d, idx) => ({
       ai_index: idx,
-      // Low confidence (<0.60) or uncertain_or_other defaults to escalate/edit review attention;
-      // high confidence defaults to accept so operator can confirm or override in 1 click
       action:
         d.confidence < confThresh || d.defect_class === "uncertain_or_other"
           ? "escalate"
@@ -534,12 +726,14 @@ export default function AOILiteBatamApp() {
     }));
     setDefectReviews(initialReviews);
 
-    // Suggest a sensible initial human disposition tab without auto-saving it
+    // Pre-highlight the suggested decision so the operator can verify & confirm in 1 click
     const origDisp = rec.original_ai_disposition || rec.ai_result?.overall_disposition;
     if (origDisp === "rework" || origDisp === "quarantine" || origDisp === "escalate") {
       setFinalDisposition(origDisp);
     } else if (aiDefects.length === 0 && rec.status === "pending_review") {
       setFinalDisposition("pass");
+    } else if (origDisp === "requires_human_verification") {
+      setFinalDisposition(aiDefects.length > 0 ? "rework" : "pass");
     } else {
       setFinalDisposition("");
     }
@@ -547,7 +741,7 @@ export default function AOILiteBatamApp() {
     setReviewError(null);
   };
 
-  // Step 2 Action: Trigger Gemma 4 Analysis or Manual Entry
+  // Trigger Gemma 4 Analysis or Manual Entry
   const handleAnalyze = async (forceManual = false) => {
     setAnalyzeError(null);
     setIsAnalyzing(true);
@@ -565,14 +759,14 @@ export default function AOILiteBatamApp() {
         precheck: precheckInfo || {},
       };
 
-      if (captureMode === "sample") {
-        payload.sample_id = selectedSampleId;
+      if (captureMode === "sample" && selectedSample) {
+        payload.sample_id = selectedSample.id;
       } else if (uploadedDataUrl) {
         payload.image_base64 = uploadedDataUrl;
         payload.image_name = uploadedFileName || "captured_pcb.jpg";
         payload.image_sha256 = imageSha256;
       } else {
-        setAnalyzeError("Please select a sample PCB image or upload/capture a photo first.");
+        setAnalyzeError("Please choose a sample board or upload/capture a photo first.");
         setIsAnalyzing(false);
         return;
       }
@@ -606,7 +800,7 @@ export default function AOILiteBatamApp() {
     );
   };
 
-  // Add a human-detected missed defect (False Negative)
+  // Add a human-detected missed defect
   const addHumanDefect = () => {
     setDefectReviews((prev) => [
       ...prev,
@@ -615,8 +809,8 @@ export default function AOILiteBatamApp() {
         action: "accept",
         defect_class: "solder_bridge",
         severity: "high",
-        location_hint: "Specify board quadrant / component ref (e.g., U3 pin 4-5)",
-        note: "Added manually by inspector (missed by AI)",
+        location_hint: "Specify component or area (e.g., U3 pins 4–5)",
+        note: "Added by inspector during visual check",
       },
     ]);
   };
@@ -625,12 +819,12 @@ export default function AOILiteBatamApp() {
     setDefectReviews((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  // Submit Step 4 Human Confirmation
+  // Submit Human Confirmation
   const handleConfirmReview = async () => {
     if (!currentRecord) return;
     if (!finalDisposition) {
       setReviewError(
-        "Human verification guardrail: You must select a final disposition (Pass, Rework, Quarantine, or Escalate) before saving."
+        "Please select a final decision (Pass, Send to Rework, Quarantine, or Escalate to QA) before completing the inspection."
       );
       return;
     }
@@ -651,7 +845,7 @@ export default function AOILiteBatamApp() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to save human review");
+        throw new Error(data.error || "Failed to save inspection review");
       }
       setCurrentRecord(data.inspection as InspectionRecord);
       await fetchAllData();
@@ -671,17 +865,19 @@ export default function AOILiteBatamApp() {
     setReviewNotes("");
     setAnalyzeError(null);
     setReviewError(null);
+    setShowTechDetails(false);
+    setShowRawJson(false);
     setStartedAtIso(new Date().toISOString());
     setElapsedDocSec(0);
   };
 
-  // Current active workflow step (1..5)
-  const currentWorkflowStep = useMemo(() => {
+  // Current active workflow stage (1 = Select & Check, 2 = Review & Sign Off, 3 = Completed)
+  const currentStage = useMemo(() => {
     if (!currentRecord) return 1;
     if (currentRecord.status === "confirmed" || currentRecord.status === "escalated") {
-      return 5;
+      return 3;
     }
-    return 3;
+    return 2;
   }, [currentRecord]);
 
   // Active preview image URL
@@ -692,7 +888,7 @@ export default function AOILiteBatamApp() {
     return uploadedDataUrl || null;
   }, [captureMode, selectedSample, uploadedDataUrl]);
 
-  // Filtered records for Records tab
+  // Filtered records for Quality Log tab
   const filteredRecords = useMemo(() => {
     return records.filter((r) => {
       if (recordStatusFilter === "all") return true;
@@ -703,9 +899,16 @@ export default function AOILiteBatamApp() {
     });
   }, [records, recordStatusFilter]);
 
+  // Compute Pass Rate for Analytics
+  const passRatePct = useMemo(() => {
+    if (!stats || !stats.counts.human_verified) return null;
+    const passCount = stats.disposition_counts?.pass ?? 0;
+    return Math.round((passCount / stats.counts.human_verified) * 100);
+  }, [stats]);
+
   return (
     <div className="min-h-screen flex flex-col bg-[#ffffff] text-[#161616]">
-      {/* Carbon Utility Bar (height: 32px, #f4f4f4 surface-1, 12px caption with 0.32px tracking) */}
+      {/* Carbon Safety Notice Bar (height: 32px, #f4f4f4 surface-1, clear human-readable notice) */}
       <div className="min-h-[32px] bg-[#f4f4f4] border-b border-[#e0e0e0] px-4 lg:px-8 py-1.5 flex flex-wrap items-center justify-between gap-2 text-[12px] leading-[1.33] tracking-[0.32px] text-[#525252]">
         <div className="flex items-center gap-2 font-semibold text-[#161616]">
           <AlertTriangle className="w-3.5 h-3.5 text-[#da1e28] shrink-0" />
@@ -713,32 +916,27 @@ export default function AOILiteBatamApp() {
             AI assistance only. Final quality disposition requires human verification. Hidden solder joints (BGA/QFN voids, head-in-pillow) require X-ray inspection.
           </span>
         </div>
-        <div className="hidden xl:flex items-center gap-4 font-mono text-[11px]">
-          <span>Model: {config?.model_id || "gemma-4-26b-a4b-it"}</span>
-          <span>Prompt: {config?.prompt_version || "aoi-prompt-v1.0"}</span>
-          <span>
-            Storage:{" "}
-            <strong className="text-[#0f62fe]">
-              {storageBackend === "supabase" ? "Supabase PostgreSQL" : "Local JSON Fallback"}
-            </strong>
+        <div className="hidden xl:flex items-center gap-3 text-[12px]">
+          <span className="inline-flex items-center gap-1.5 text-[#161616]">
+            <span className="w-2 h-2 bg-[#24a148] inline-block" />
+            <span>
+              {storageBackend === "supabase" ? "Cloud Quality Log Connected" : "Offline Local Mode"}
+            </span>
           </span>
         </div>
       </div>
 
-      {/* Carbon Top Nav (height: 48px, #ffffff canvas, 1px bottom hairline) */}
+      {/* Carbon Top Navigation */}
       <header className="min-h-[48px] bg-[#ffffff] border-b border-[#e0e0e0] px-4 lg:px-8 flex flex-wrap items-center justify-between">
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2.5 py-2">
             <span className="inline-block w-3 h-3 bg-[#0f62fe]" />
             <span className="text-[16px] font-semibold tracking-[0.16px] text-[#161616]">
-              AOI-Lite Batam
-            </span>
-            <span className="text-[12px] tracking-[0.32px] text-[#525252] border border-[#e0e0e0] bg-[#f4f4f4] px-2 py-0.5">
-              Gemma 4 Multimodal
+              AOI-Lite Batam: AI-Assisted SMT Inspection
             </span>
           </div>
 
-          {/* Carbon Product Tabs (0px corners, 2px #0f62fe bottom underline when selected) */}
+          {/* Carbon Product Tabs */}
           <nav className="flex items-center">
             <button
               type="button"
@@ -750,7 +948,7 @@ export default function AOILiteBatamApp() {
               }`}
             >
               <Cpu className="w-4 h-4" />
-              <span>Inspect station</span>
+              <span>Inspector Station</span>
             </button>
 
             <button
@@ -763,10 +961,10 @@ export default function AOILiteBatamApp() {
               }`}
             >
               <Database className="w-4 h-4" />
-              <span>Quality records ({records.length})</span>
+              <span>Quality Log ({records.length})</span>
               {stats && stats.counts.pending_review > 0 && (
                 <span className="bg-[#f1c21b] text-[#161616] text-[12px] font-semibold px-1.5 py-0.5">
-                  {stats.counts.pending_review} pending
+                  {stats.counts.pending_review} needs review
                 </span>
               )}
             </button>
@@ -781,81 +979,220 @@ export default function AOILiteBatamApp() {
               }`}
             >
               <Layers className="w-4 h-4" />
-              <span>DMAIC dashboard</span>
+              <span>Quality Analytics</span>
             </button>
           </nav>
         </div>
 
-        {/* Right status & quick export buttons */}
+        {/* Quick Export Buttons */}
         <div className="flex items-center gap-2 py-1.5">
           <a
             href="/api/export/csv"
             className="px-3 py-2 text-[12px] tracking-[0.32px] text-[#0f62fe] border border-[#0f62fe] hover:bg-[#0f62fe] hover:text-[#ffffff] transition-colors flex items-center gap-1.5"
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>Export CSV</span>
+            <span>Export Spreadsheet (CSV)</span>
           </a>
           <a
             href="/api/export/json"
             className="px-3 py-2 text-[12px] tracking-[0.32px] text-[#161616] border border-[#e0e0e0] bg-[#f4f4f4] hover:bg-[#e0e0e0] transition-colors flex items-center gap-1.5"
           >
             <FileJson className="w-3.5 h-3.5" />
-            <span>Export JSON</span>
+            <span>Export Audit Report</span>
           </a>
         </div>
       </header>
 
-      {/* Main Content Container (Max width 1584px per Carbon grid spec) */}
+      {/* Main Content Container */}
       <main className="flex-1 w-full max-w-[1584px] mx-auto px-4 lg:px-8 py-6">
         {/* =================================================================== */}
-        {/* TAB 1: INSPECT STATION (5-STEP WORKFLOW)                            */}
+        {/* TAB 1: INSPECTOR STATION (STREAMLINED 3-STAGE WORKFLOW)             */}
         {/* =================================================================== */}
         {activeTab === "inspect" && (
           <div className="space-y-6">
-            {/* Carbon Hero Header + 5-Step Progress Strip */}
+            {/* Compact Header + 3-Stage Stepper + Active Shift/Station Bar */}
             <section className="border border-[#e0e0e0] bg-[#ffffff]">
-              <div className="p-6 lg:p-8 border-b border-[#e0e0e0] flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+              <div className="p-5 lg:px-8 lg:py-6 border-b border-[#e0e0e0] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                  <p className="text-[14px] leading-[1.29] tracking-[0.16px] text-[#0f62fe] mb-2">
-                    Surface-mount technology (SMT) quality station · Batam industrial &amp; SMK lab edition
+                  <p className="text-[13px] tracking-[0.16px] text-[#0f62fe] mb-1">
+                    Batam Electronics Manufacturing &amp; SMK Lab Quality Assistant
                   </p>
-                  <h1 className="text-[32px] lg:text-[42px] font-light leading-[1.20] text-[#161616]">
-                    Human-in-the-loop PCB visual inspection
+                  <h1 className="text-[28px] lg:text-[36px] font-light leading-[1.20] text-[#161616]">
+                    Visual PCB Inspection Station
                   </h1>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-[12px] tracking-[0.32px] text-[#525252]">
-                  <div className="bg-[#f4f4f4] border border-[#e0e0e0] px-3 py-2 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[#0f62fe]" />
-                    <span>Doc timer: </span>
-                    <strong className="font-mono text-[#161616]">{elapsedDocSec}s</strong>
+
+                {/* Active Station & Operator Quick Summary Bar */}
+                <div className="flex flex-wrap items-center gap-2 text-[13px]">
+                  <div className="bg-[#f4f4f4] border border-[#e0e0e0] px-3 py-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <span>
+                      <span className="text-[#525252]">Inspector: </span>
+                      <strong className="text-[#161616]">{formatOperatorName(operatorId)}</strong>
+                    </span>
+                    <span className="text-[#e0e0e0]">|</span>
+                    <span>
+                      <span className="text-[#525252]">Station: </span>
+                      <strong className="text-[#161616]">{formatLineStation(lineStation)}</strong>
+                    </span>
+                    <span className="text-[#e0e0e0]">|</span>
+                    <span>
+                      <span className="text-[#525252]">Board: </span>
+                      <strong className="text-[#161616]">
+                        {boardId} (Rev {boardRevision})
+                      </strong>
+                    </span>
                   </div>
-                  <div className="bg-[#f4f4f4] border border-[#e0e0e0] px-3 py-2">
-                    Confidence gate:{" "}
-                    <strong className="font-mono text-[#161616]">
-                      {Math.round((config?.confidence_threshold ?? 0.6) * 100)}%
-                    </strong>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowStationEditor((v) => !v)}
+                    className={`min-h-[38px] px-3 py-2 text-[12px] font-semibold border transition-colors flex items-center gap-1.5 ${
+                      showStationEditor
+                        ? "border-[#0f62fe] bg-[#0f62fe] text-[#ffffff]"
+                        : "border-[#e0e0e0] bg-[#ffffff] text-[#0f62fe] hover:bg-[#f4f4f4]"
+                    }`}
+                  >
+                    <Settings2 className="w-3.5 h-3.5" />
+                    <span>{showStationEditor ? "Done Editing" : "Edit Station / Board"}</span>
+                  </button>
+
+                  <div className="bg-[#f4f4f4] border border-[#e0e0e0] px-3 py-2 flex items-center gap-1.5 text-[12px]">
+                    <Clock className="w-3.5 h-3.5 text-[#0f62fe]" />
+                    <span className="text-[#525252]">Review timer:</span>
+                    <strong className="text-[#161616]">{elapsedDocSec}s</strong>
                   </div>
                 </div>
               </div>
 
-              {/* 5-Step Workflow Progress Bar */}
-              <div className="grid grid-cols-2 lg:grid-cols-5 bg-[#f4f4f4] divide-y lg:divide-y-0 lg:divide-x divide-[#e0e0e0]">
+              {/* Collapsible Station & Board Metadata Editor */}
+              {showStationEditor && (
+                <div className="p-5 lg:px-8 bg-[#f4f4f4] border-b border-[#e0e0e0]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div>
+                      <label className="block text-[12px] text-[#525252] mb-1">
+                        Board Serial / ID
+                      </label>
+                      <input
+                        type="text"
+                        value={boardId}
+                        onChange={(e) => setBoardId(e.target.value)}
+                        className="carbon-input w-full text-[14px] bg-[#ffffff]"
+                        placeholder="BAT-PCBA-101"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12px] text-[#525252] mb-1">
+                        Board Revision
+                      </label>
+                      <input
+                        type="text"
+                        value={boardRevision}
+                        onChange={(e) => setBoardRevision(e.target.value)}
+                        className="carbon-input w-full text-[14px] bg-[#ffffff]"
+                        placeholder="A"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12px] text-[#525252] mb-1">
+                        Production Line / Bench
+                      </label>
+                      <select
+                        value={lineStation}
+                        onChange={(e) => setLineStation(e.target.value)}
+                        className="carbon-input w-full text-[14px] bg-[#ffffff]"
+                      >
+                        {(
+                          config?.demo_lines || [
+                            "Line-1-PostReflow",
+                            "Line-2-FirstArticle",
+                            "SMK-Lab-Bench-A",
+                            "Rework-Cell-01",
+                          ]
+                        ).map((ln) => (
+                          <option key={ln} value={ln}>
+                            {formatLineStation(ln)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[12px] text-[#525252] mb-1">
+                        Inspector Name
+                      </label>
+                      <select
+                        value={operatorId}
+                        onChange={(e) => {
+                          setOperatorId(e.target.value);
+                          setReviewerId(e.target.value);
+                        }}
+                        className="carbon-input w-full text-[14px] bg-[#ffffff]"
+                      >
+                        {(
+                          config?.demo_operators || [
+                            "OP-BTM-01 (Siti - Line 1)",
+                            "OP-BTM-02 (Budi - Line 2)",
+                            "OP-SMK-01 (Rizky - SMK Lab)",
+                            "QA-LEAD-01 (Dewi - Senior QA)",
+                          ]
+                        ).map((op) => (
+                          <option key={op} value={op}>
+                            {formatOperatorName(op)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[12px] text-[#525252] mb-1">
+                        Inspection Stage
+                      </label>
+                      <select
+                        value={inspectionType}
+                        onChange={(e) => setInspectionType(e.target.value)}
+                        className="carbon-input w-full text-[14px] bg-[#ffffff]"
+                      >
+                        {(
+                          config?.inspection_types || [
+                            "post_reflow",
+                            "first_article",
+                            "rework_verification",
+                            "smk_lab_training",
+                          ]
+                        ).map((tp) => (
+                          <option key={tp} value={tp}>
+                            {formatInspectionStage(tp)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Guided 3-Stage Stepper */}
+              <div className="grid grid-cols-1 md:grid-cols-3 bg-[#f4f4f4] divide-y md:divide-y-0 md:divide-x divide-[#e0e0e0]">
                 {[
-                  { step: 1, title: "1. Capture image", sub: "Sample, upload, or camera" },
-                  { step: 2, title: "2. Metadata & AI", sub: "Gemma 4 multimodal inference" },
-                  { step: 3, title: "3. Review defects", sub: "Accept, edit, reject, escalate" },
-                  { step: 4, title: "4. Confirm disposition", sub: "Human sign-off required" },
-                  { step: 5, title: "5. Audit & export", sub: "Supabase + CSV / JSON" },
+                  {
+                    step: 1,
+                    title: "Step 1 · Select or Capture Board",
+                    sub: "Pick a sample board, upload a photo, or use the bench camera",
+                  },
+                  {
+                    step: 2,
+                    title: "Step 2 · Review AI Findings",
+                    sub: "Check highlighted issues and confirm or adjust each finding",
+                  },
+                  {
+                    step: 3,
+                    title: "Step 3 · Final Sign-Off",
+                    sub: "Confirm Pass, Rework, Quarantine, or Escalate to save the record",
+                  },
                 ].map((item) => {
-                  const isActive =
-                    (item.step <= 2 && currentWorkflowStep === 1) ||
-                    ((item.step === 3 || item.step === 4) && currentWorkflowStep === 3) ||
-                    (item.step === 5 && currentWorkflowStep === 5);
-                  const isDone = item.step < currentWorkflowStep;
+                  const isActive = currentStage === item.step;
+                  const isDone = item.step < currentStage;
                   return (
                     <div
                       key={item.step}
-                      className={`p-4 border-t-2 transition-colors ${
+                      className={`px-6 py-3.5 border-t-2 transition-colors ${
                         isActive
                           ? "border-[#0f62fe] bg-[#ffffff]"
                           : isDone
@@ -863,42 +1200,43 @@ export default function AOILiteBatamApp() {
                           : "border-transparent bg-[#f4f4f4]"
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center justify-between mb-0.5">
                         <span className="text-[14px] font-semibold tracking-[0.16px] text-[#161616]">
                           {item.title}
                         </span>
-                        {isDone && <Check className="w-4 h-4 text-[#24a148]" />}
+                        {isDone && (
+                          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#24a148]">
+                            <Check className="w-4 h-4" /> Done
+                          </span>
+                        )}
                       </div>
-                      <p className="text-[12px] tracking-[0.32px] text-[#525252]">{item.sub}</p>
+                      <p className="text-[12px] text-[#525252]">{item.sub}</p>
                     </div>
                   );
                 })}
               </div>
             </section>
 
-            {/* Main 2-Column Workspace: Left = Step 1 & Step 2 | Right = Step 3, 4, 5 */}
+            {/* Main 2-Column Workspace */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* LEFT COLUMN (5 cols on lg): Step 1 (Image Capture) + Step 2 (Metadata & Analyze) */}
+              {/* LEFT COLUMN (5 cols on lg): Unified Board Selection + Preview + 1-Click Run AI */}
               <div className="lg:col-span-5 space-y-6">
-                {/* STEP 1 CARD: CAPTURE OR SELECT PCB IMAGE */}
                 <div className="border border-[#e0e0e0] bg-[#ffffff]">
                   <div className="px-6 py-4 bg-[#f4f4f4] border-b border-[#e0e0e0] flex items-center justify-between">
                     <div>
-                      <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                        Step 1 of 5
+                      <span className="text-[12px] text-[#0f62fe] font-semibold block">
+                        Board Image Input
                       </span>
-                      <h2 className="text-[20px] font-normal leading-[1.40] text-[#161616]">
-                        Capture or select PCB image
+                      <h2 className="text-[18px] font-semibold text-[#161616]">
+                        Choose or capture a PCB to inspect
                       </h2>
                     </div>
-                    <span className="text-[12px] font-mono bg-[#ffffff] border border-[#e0e0e0] px-2.5 py-1 text-[#161616]">
-                      {captureMode === "sample"
-                        ? `Sample: ${selectedSampleId}`
-                        : uploadedFileName || "Custom image"}
+                    <span className="text-[12px] bg-[#ffffff] border border-[#e0e0e0] px-2.5 py-1 text-[#161616]">
+                      Board: <strong>{boardId}</strong>
                     </span>
                   </div>
 
-                  {/* Capture Mode Switcher */}
+                  {/* Input Source Tabs */}
                   <div className="grid grid-cols-3 border-b border-[#e0e0e0]">
                     <button
                       type="button"
@@ -906,14 +1244,14 @@ export default function AOILiteBatamApp() {
                         stopCamera();
                         setCaptureMode("sample");
                       }}
-                      className={`min-h-[48px] px-3 py-2 text-[14px] tracking-[0.16px] border-b-2 flex items-center justify-center gap-2 ${
+                      className={`min-h-[46px] px-3 py-2 text-[13px] border-b-2 flex items-center justify-center gap-2 ${
                         captureMode === "sample"
                           ? "border-[#0f62fe] bg-[#ffffff] font-semibold text-[#161616]"
                           : "border-transparent bg-[#f4f4f4] text-[#525252] hover:text-[#161616]"
                       }`}
                     >
                       <Layers className="w-4 h-4" />
-                      <span>Sample gallery (16)</span>
+                      <span>Sample Boards ({samples.length || 16})</span>
                     </button>
                     <button
                       type="button"
@@ -921,45 +1259,43 @@ export default function AOILiteBatamApp() {
                         stopCamera();
                         setCaptureMode("upload");
                       }}
-                      className={`min-h-[48px] px-3 py-2 text-[14px] tracking-[0.16px] border-b-2 flex items-center justify-center gap-2 ${
+                      className={`min-h-[46px] px-3 py-2 text-[13px] border-b-2 flex items-center justify-center gap-2 ${
                         captureMode === "upload"
                           ? "border-[#0f62fe] bg-[#ffffff] font-semibold text-[#161616]"
                           : "border-transparent bg-[#f4f4f4] text-[#525252] hover:text-[#161616]"
                       }`}
                     >
                       <Upload className="w-4 h-4" />
-                      <span>Upload photo</span>
+                      <span>Upload Photo</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => {
                         setCaptureMode("camera");
                       }}
-                      className={`min-h-[48px] px-3 py-2 text-[14px] tracking-[0.16px] border-b-2 flex items-center justify-center gap-2 ${
+                      className={`min-h-[46px] px-3 py-2 text-[13px] border-b-2 flex items-center justify-center gap-2 ${
                         captureMode === "camera"
                           ? "border-[#0f62fe] bg-[#ffffff] font-semibold text-[#161616]"
                           : "border-transparent bg-[#f4f4f4] text-[#525252] hover:text-[#161616]"
                       }`}
                     >
                       <Camera className="w-4 h-4" />
-                      <span>Camera capture</span>
+                      <span>Bench Camera</span>
                     </button>
                   </div>
 
-                  <div className="p-6 space-y-4">
-                    {/* Mode A: Sample Gallery */}
+                  <div className="p-5 space-y-4">
+                    {/* Mode A: Sample Gallery with Human-Readable Cards */}
                     {captureMode === "sample" && (
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="text-[12px] tracking-[0.32px] text-[#525252]">
-                            Filter preloaded boards:
-                          </span>
+                          <span className="text-[12px] text-[#525252]">Filter board type:</span>
                           <div className="flex flex-wrap gap-1">
                             {[
-                              { id: "all", label: "All (16)" },
-                              { id: "smt", label: "SMT assembly (4)" },
-                              { id: "pku", label: "PKU bare-PCB (10)" },
-                              { id: "golden", label: "Golden pass (2)" },
+                              { id: "all", label: "All Boards (16)" },
+                              { id: "smt", label: "SMT Assembly (4)" },
+                              { id: "pku", label: "Copper / Trace (10)" },
+                              { id: "golden", label: "Clean Reference (2)" },
                             ].map((f) => (
                               <button
                                 key={f.id}
@@ -967,9 +1303,9 @@ export default function AOILiteBatamApp() {
                                 onClick={() =>
                                   setSampleFilter(f.id as "all" | "smt" | "pku" | "golden")
                                 }
-                                className={`px-2.5 py-1 text-[12px] tracking-[0.32px] border ${
+                                className={`px-2.5 py-1 text-[12px] border transition-colors ${
                                   sampleFilter === f.id
-                                    ? "border-[#0f62fe] bg-[#0f62fe] text-[#ffffff]"
+                                    ? "border-[#0f62fe] bg-[#0f62fe] text-[#ffffff] font-semibold"
                                     : "border-[#e0e0e0] bg-[#f4f4f4] text-[#161616] hover:bg-[#e0e0e0]"
                                 }`}
                               >
@@ -979,9 +1315,9 @@ export default function AOILiteBatamApp() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-h-[240px] overflow-y-auto p-1 border border-[#e0e0e0] bg-[#f4f4f4]">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-h-[230px] overflow-y-auto p-1.5 border border-[#e0e0e0] bg-[#f4f4f4]">
                           {filteredSamples.map((smp) => {
-                            const selected = smp.id === selectedSampleId;
+                            const selected = smp.id === selectedSample?.id;
                             return (
                               <button
                                 key={smp.id}
@@ -1001,25 +1337,19 @@ export default function AOILiteBatamApp() {
                                     className="w-full h-full object-cover"
                                   />
                                   {smp.is_golden && (
-                                    <span className="absolute top-1 left-1 bg-[#24a148] text-[#ffffff] text-[10px] px-1 py-0.5 font-semibold">
-                                      GOLDEN
-                                    </span>
-                                  )}
-                                  {smp.has_cache && (
-                                    <span
-                                      title="Offline cached Gemma 4 response available"
-                                      className="absolute bottom-1 right-1 bg-[#161616] text-[#ffffff] text-[9px] px-1 py-0.5 font-mono"
-                                    >
-                                      CACHED
+                                    <span className="absolute top-1 left-1 bg-[#24a148] text-[#ffffff] text-[10px] px-1.5 py-0.5 font-semibold">
+                                      CLEAN REF
                                     </span>
                                   )}
                                 </div>
                                 <div>
                                   <p className="text-[12px] font-semibold text-[#161616] truncate">
-                                    {smp.title}
+                                    {smp.title.replace(/_/g, " ")}
                                   </p>
-                                  <p className="text-[11px] font-mono text-[#525252] truncate">
-                                    {smp.expected_defect_class}
+                                  <p className="text-[11px] text-[#525252] truncate">
+                                    {smp.is_golden
+                                      ? "Pass Reference"
+                                      : formatDefectClass(smp.expected_defect_class)}
                                   </p>
                                 </div>
                               </button>
@@ -1035,15 +1365,15 @@ export default function AOILiteBatamApp() {
                         <Upload className="w-8 h-8 text-[#0f62fe] mx-auto" />
                         <div>
                           <p className="text-[14px] font-semibold text-[#161616]">
-                            Select a PCB macro photograph (JPEG / PNG / WebP)
+                            Upload a PCB photograph from your device
                           </p>
                           <p className="text-[12px] text-[#525252]">
-                            Client-side pre-processor resizes to max 1400px and computes SHA-256 hash.
+                            Supports JPEG, PNG, or WebP photos. Please do not upload confidential customer boards.
                           </p>
                         </div>
                         <label className="carbon-btn-primary inline-flex items-center gap-2 cursor-pointer">
                           <Upload className="w-4 h-4" />
-                          <span>Choose PCB image file</span>
+                          <span>Choose Board Photo</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -1059,7 +1389,7 @@ export default function AOILiteBatamApp() {
                       <div className="border border-[#e0e0e0] bg-[#f4f4f4] p-4 space-y-3">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <span className="text-[14px] font-semibold text-[#161616]">
-                            Bench / tablet camera capture
+                            Bench or Tablet Camera
                           </span>
                           <div className="flex gap-2">
                             {!cameraActive ? (
@@ -1069,7 +1399,7 @@ export default function AOILiteBatamApp() {
                                 className="carbon-btn-primary flex items-center gap-2"
                               >
                                 <Camera className="w-4 h-4" />
-                                <span>Start live camera</span>
+                                <span>Start Camera</span>
                               </button>
                             ) : (
                               <>
@@ -1079,7 +1409,7 @@ export default function AOILiteBatamApp() {
                                   className="carbon-btn-primary flex items-center gap-2"
                                 >
                                   <Camera className="w-4 h-4" />
-                                  <span>Capture frame</span>
+                                  <span>Take Photo</span>
                                 </button>
                                 <button
                                   type="button"
@@ -1110,10 +1440,10 @@ export default function AOILiteBatamApp() {
                           />
                           {!cameraActive && (
                             <div className="text-center p-4 text-[#c6c6c6] text-[12px] space-y-2">
-                              <p>Camera preview inactive.</p>
+                              <p>Camera preview is currently off.</p>
                               <label className="carbon-btn-tertiary inline-flex items-center gap-2 cursor-pointer">
                                 <Camera className="w-4 h-4" />
-                                <span>Fallback: Open mobile camera / file picker</span>
+                                <span>Open Mobile Camera / Photo Picker</span>
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -1128,18 +1458,14 @@ export default function AOILiteBatamApp() {
                       </div>
                     )}
 
-                    {/* Active PCB Image Preview + Ground-Truth Overlay Toggle */}
+                    {/* Active PCB Image Preview */}
                     {activeImageUrl && (
                       <div className="border border-[#e0e0e0] bg-[#161616]">
-                        <div className="px-3 py-2 bg-[#262626] text-[#ffffff] text-[12px] flex flex-wrap items-center justify-between gap-2">
-                          <span className="font-mono truncate">
+                        <div className="px-3.5 py-2 bg-[#262626] text-[#ffffff] text-[12px] flex flex-wrap items-center justify-between gap-2">
+                          <span className="font-semibold truncate">
                             {captureMode === "sample" && selectedSample
-                              ? `${selectedSample.title} (${selectedSample.width}×${selectedSample.height}px)`
-                              : `${uploadedFileName || "Uploaded PCB"} ${
-                                  precheckInfo
-                                    ? `(${precheckInfo.width}×${precheckInfo.height}px · ${precheckInfo.status})`
-                                    : ""
-                                }`}
+                              ? selectedSample.title.replace(/_/g, " ")
+                              : uploadedFileName || "Captured Board Photo"}
                           </span>
                           {captureMode === "sample" &&
                             selectedSample?.bboxes &&
@@ -1147,7 +1473,7 @@ export default function AOILiteBatamApp() {
                               <button
                                 type="button"
                                 onClick={() => setShowGroundTruthBoxes((v) => !v)}
-                                className={`px-2 py-0.5 text-[11px] border transition-colors flex items-center gap-1 ${
+                                className={`px-2.5 py-0.5 text-[11px] border transition-colors flex items-center gap-1.5 ${
                                   showGroundTruthBoxes
                                     ? "border-[#f1c21b] bg-[#f1c21b] text-[#161616] font-semibold"
                                     : "border-[#8c8c8c] text-[#c6c6c6] hover:text-[#ffffff]"
@@ -1156,8 +1482,8 @@ export default function AOILiteBatamApp() {
                                 <Eye className="w-3 h-3" />
                                 <span>
                                   {showGroundTruthBoxes
-                                    ? "Hide dataset ROI boxes"
-                                    : `Show dataset ROI boxes (${selectedSample.bboxes.length})`}
+                                    ? "Hide Defect Highlights"
+                                    : `Highlight Defect Area (${selectedSample.bboxes.length})`}
                                 </span>
                               </button>
                             )}
@@ -1168,7 +1494,7 @@ export default function AOILiteBatamApp() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={activeImageUrl}
-                              alt="Active PCB inspection target"
+                              alt="Selected PCB for visual inspection"
                               className="w-full max-h-[320px] object-contain mx-auto block"
                             />
                             {showGroundTruthBoxes &&
@@ -1186,8 +1512,8 @@ export default function AOILiteBatamApp() {
                                     }}
                                     className="absolute border-2 border-[#f1c21b] bg-[#f1c21b]/15 pointer-events-none"
                                   >
-                                    <span className="bg-[#f1c21b] text-[#161616] text-[10px] font-mono font-semibold px-1 py-0.5 absolute -top-5 left-0 whitespace-nowrap">
-                                      {box.orig_label} ({box.quadrant})
+                                    <span className="bg-[#f1c21b] text-[#161616] text-[10px] font-semibold px-1.5 py-0.5 absolute -top-5 left-0 whitespace-nowrap">
+                                      {formatOrigSubcategory(box.orig_label)} ({box.quadrant})
                                     </span>
                                   </div>
                                 );
@@ -1197,141 +1523,33 @@ export default function AOILiteBatamApp() {
 
                         {captureMode === "sample" && selectedSample && (
                           <div className="p-3 bg-[#f4f4f4] border-t border-[#e0e0e0] text-[12px] text-[#525252] flex flex-wrap items-center justify-between gap-2">
-                            <span>{selectedSample.description}</span>
-                            <span className="font-mono text-[#161616]">
-                              Ref class: <strong>{selectedSample.expected_defect_class}</strong>
+                            <span>
+                              {selectedSample.is_golden
+                                ? "Defect-free reference board used to verify pass criteria."
+                                : `Sample board illustrating: ${formatDefectClass(
+                                    selectedSample.expected_defect_class
+                                  )} (${selectedSample.location_hint}).`}
+                            </span>
+                            <span className="bg-[#ffffff] border border-[#e0e0e0] px-2 py-0.5 text-[#161616] font-semibold">
+                              {selectedSample.is_golden
+                                ? "Clean Reference"
+                                : formatDefectClass(selectedSample.expected_defect_class)}
                             </span>
                           </div>
                         )}
                       </div>
                     )}
-                  </div>
-                </div>
 
-                {/* STEP 2 CARD: PCB METADATA & GEMMA 4 INFERENCE */}
-                <div className="border border-[#e0e0e0] bg-[#ffffff]">
-                  <div className="px-6 py-4 bg-[#f4f4f4] border-b border-[#e0e0e0]">
-                    <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                      Step 2 of 5
-                    </span>
-                    <h2 className="text-[20px] font-normal leading-[1.40] text-[#161616]">
-                      Station metadata &amp; Gemma 4 analysis
-                    </h2>
-                  </div>
-
-                  <div className="p-6 space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[12px] tracking-[0.32px] text-[#525252] mb-1">
-                          Board ID / serial
-                        </label>
-                        <input
-                          type="text"
-                          value={boardId}
-                          onChange={(e) => setBoardId(e.target.value)}
-                          className="carbon-input w-full font-mono text-[14px]"
-                          placeholder="BAT-PCBA-101"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[12px] tracking-[0.32px] text-[#525252] mb-1">
-                          Board revision
-                        </label>
-                        <input
-                          type="text"
-                          value={boardRevision}
-                          onChange={(e) => setBoardRevision(e.target.value)}
-                          className="carbon-input w-full font-mono text-[14px]"
-                          placeholder="Rev A"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[12px] tracking-[0.32px] text-[#525252] mb-1">
-                          Line / inspection station
-                        </label>
-                        <select
-                          value={lineStation}
-                          onChange={(e) => setLineStation(e.target.value)}
-                          className="carbon-input w-full text-[14px]"
-                        >
-                          {(
-                            config?.demo_lines || [
-                              "Line-1-PostReflow",
-                              "Line-2-FirstArticle",
-                              "SMK-Lab-Bench-A",
-                              "Rework-Cell-01",
-                            ]
-                          ).map((ln) => (
-                            <option key={ln} value={ln}>
-                              {ln}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-[12px] tracking-[0.32px] text-[#525252] mb-1">
-                          Operator ID
-                        </label>
-                        <select
-                          value={operatorId}
-                          onChange={(e) => {
-                            setOperatorId(e.target.value);
-                            setReviewerId(e.target.value);
-                          }}
-                          className="carbon-input w-full text-[14px]"
-                        >
-                          {(
-                            config?.demo_operators || [
-                              "OP-BTM-01 (Siti - Line 1)",
-                              "OP-BTM-02 (Budi - Line 2)",
-                              "OP-SMK-01 (Rizky - SMK Lab)",
-                              "QA-LEAD-01 (Dewi - Senior QA)",
-                            ]
-                          ).map((op) => (
-                            <option key={op} value={op}>
-                              {op}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[12px] tracking-[0.32px] text-[#525252] mb-1">
-                        Inspection stage
-                      </label>
-                      <select
-                        value={inspectionType}
-                        onChange={(e) => setInspectionType(e.target.value)}
-                        className="carbon-input w-full text-[14px]"
-                      >
-                        {(
-                          config?.inspection_types || [
-                            "post_reflow",
-                            "first_article",
-                            "rework_verification",
-                            "smk_lab_training",
-                          ]
-                        ).map((tp) => (
-                          <option key={tp} value={tp}>
-                            {tp.replace(/_/g, " ")}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
+                    {/* Error Notice */}
                     {analyzeError && (
-                      <div className="p-3 bg-[#f4f4f4] border-l-4 border-[#da1e28] text-[14px] text-[#161616]">
-                        <strong className="font-semibold text-[#da1e28]">Error: </strong>
+                      <div className="p-3 bg-[#f4f4f4] border-l-4 border-[#da1e28] text-[13px] text-[#161616]">
+                        <strong className="font-semibold text-[#da1e28]">Unable to run check: </strong>
                         {analyzeError}
                       </div>
                     )}
 
-                    <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                    {/* Primary 1-Click Action Buttons Right Under the Board Preview */}
+                    <div className="pt-1 flex flex-col sm:flex-row gap-3">
                       <button
                         type="button"
                         disabled={isAnalyzing}
@@ -1342,13 +1560,13 @@ export default function AOILiteBatamApp() {
                           <>
                             <RefreshCw className="w-4 h-4 animate-spin" />
                             <span>
-                              Analyzing with Gemma 4 ({(analyzeElapsedMs / 1000).toFixed(1)}s)...
+                              Checking board with AI ({(analyzeElapsedMs / 1000).toFixed(1)}s)...
                             </span>
                           </>
                         ) : (
                           <>
                             <Sparkles className="w-4 h-4" />
-                            <span>Analyze with Gemma 4</span>
+                            <span>Run AI Visual Check</span>
                           </>
                         )}
                       </button>
@@ -1358,152 +1576,205 @@ export default function AOILiteBatamApp() {
                         disabled={isAnalyzing}
                         onClick={() => handleAnalyze(true)}
                         className="carbon-btn-secondary flex items-center justify-center gap-2"
-                        title="Bypass AI inference and log defects manually"
+                        title="Skip AI check and record inspection findings manually"
                       >
                         <Edit3 className="w-4 h-4" />
-                        <span>Direct manual entry</span>
+                        <span>Log Manually</span>
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* RIGHT COLUMN (7 cols on lg): Step 3 (Review) + Step 4 (Disposition) + Step 5 (Confirmed) */}
+              {/* RIGHT COLUMN (7 cols on lg): Human-Readable Findings Review & Sign-Off */}
               <div className="lg:col-span-7 space-y-6">
                 {!currentRecord ? (
-                  <div className="border border-[#e0e0e0] bg-[#f4f4f4] p-12 text-center space-y-4">
-                    <Cpu className="w-10 h-10 text-[#0f62fe] mx-auto" />
-                    <div className="max-w-lg mx-auto space-y-2">
-                      <h3 className="text-[24px] font-light text-[#161616]">
-                        Awaiting PCB analysis or manual entry
-                      </h3>
-                      <p className="text-[14px] text-[#525252] leading-[1.5]">
-                        Select a PCB sample on the left (or upload/capture a board photo), verify the station metadata, and click{" "}
-                        <strong className="text-[#161616]">Analyze with Gemma 4</strong>. The model returns a strict Zod-validated JSON report for human review.
-                      </p>
+                  <div className="border border-[#e0e0e0] bg-[#f4f4f4] p-8 lg:p-10 space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#e0e0e0] pb-6">
+                      <div className="space-y-1.5">
+                        <span className="text-[12px] font-semibold uppercase tracking-[0.32px] text-[#0f62fe]">
+                          Ready for Inspection
+                        </span>
+                        <h3 className="text-[24px] font-light text-[#161616]">
+                          Click &ldquo;Run AI Visual Check&rdquo; to inspect this board
+                        </h3>
+                        <p className="text-[14px] text-[#525252] max-w-xl">
+                          The AI assistant scans the board photo for visible component and solder issues, explains what it sees in plain language, and prepares a quality record for your sign-off.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={isAnalyzing}
+                        onClick={() => handleAnalyze(false)}
+                        className="carbon-btn-primary shrink-0 flex items-center gap-2 font-semibold"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        <span>Run AI Visual Check</span>
+                      </button>
                     </div>
-                    <div className="max-w-xl mx-auto pt-4 border-t border-[#e0e0e0] text-[12px] text-[#525252] grid grid-cols-2 sm:grid-cols-3 gap-2 text-left">
-                      <div className="p-2.5 bg-[#ffffff] border border-[#e0e0e0]">
-                        <span className="font-mono text-[#0f62fe] block">missing_component</span>
-                        <span>Empty pad / unpopulated footprint</span>
-                      </div>
-                      <div className="p-2.5 bg-[#ffffff] border border-[#e0e0e0]">
-                        <span className="font-mono text-[#0f62fe] block">solder_bridge</span>
-                        <span>Unintended solder or copper short</span>
-                      </div>
-                      <div className="p-2.5 bg-[#ffffff] border border-[#e0e0e0]">
-                        <span className="font-mono text-[#0f62fe] block">polarity_error</span>
-                        <span>Reversed diode/IC orientation</span>
-                      </div>
-                      <div className="p-2.5 bg-[#ffffff] border border-[#e0e0e0]">
-                        <span className="font-mono text-[#0f62fe] block">tombstoning</span>
-                        <span>Lifted passive chip termination</span>
-                      </div>
-                      <div className="p-2.5 bg-[#ffffff] border border-[#e0e0e0]">
-                        <span className="font-mono text-[#0f62fe] block">component_shift</span>
-                        <span>Skewed off-pad SMD placement</span>
-                      </div>
-                      <div className="p-2.5 bg-[#ffffff] border border-[#e0e0e0]">
-                        <span className="font-mono text-[#0f62fe] block">uncertain_or_other</span>
-                        <span>Open trace, spur, pinhole, ambiguous</span>
+
+                    <div className="space-y-3">
+                      <h4 className="text-[14px] font-semibold text-[#161616]">
+                        What the AI Visual Check looks for (6 visible defect types):
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-[13px]">
+                        {(Object.keys(DEFECT_LABELS) as DefectClass[]).map((cls) => (
+                          <div
+                            key={cls}
+                            className="p-3.5 bg-[#ffffff] border border-[#e0e0e0] space-y-1"
+                          >
+                            <span className="font-semibold text-[#0f62fe] block">
+                              {DEFECT_LABELS[cls]}
+                            </span>
+                            <p className="text-[12px] text-[#525252] leading-[1.4]">
+                              {DEFECT_DESCRIPTIONS[cls]}
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
                 ) : (
                   <>
-                    {/* STEP 3 CARD: AI-SUGGESTED DEFECT REVIEW */}
+                    {/* REVIEW & FINDINGS CARD */}
                     <div className="border border-[#e0e0e0] bg-[#ffffff]">
-                      {/* Prominent AI-SUGGESTED vs HUMAN-CONFIRMED Status Banner */}
+                      {/* Clear Plain-English Status Banner */}
                       {currentRecord.status === "confirmed" ||
                       currentRecord.status === "escalated" ? (
                         <div
-                          className={`px-6 py-4 border-b border-[#e0e0e0] flex flex-wrap items-center justify-between gap-2 ${
+                          className={`px-6 py-4 border-b border-[#e0e0e0] flex flex-wrap items-center justify-between gap-3 ${
                             currentRecord.status === "confirmed"
                               ? "bg-[#24a148] text-[#ffffff]"
                               : "bg-[#f1c21b] text-[#161616]"
                           }`}
                         >
-                          <div className="flex items-center gap-2.5">
-                            <CheckCircle2 className="w-5 h-5 shrink-0" />
+                          <div className="flex items-center gap-3">
+                            <CheckCircle2 className="w-6 h-6 shrink-0" />
                             <div>
-                              <span className="text-[12px] font-mono uppercase tracking-[0.32px] block">
-                                Step 5 of 5 · Quality record locked
+                              <span className="text-[12px] font-semibold uppercase tracking-[0.32px] block">
+                                Inspection Signed Off &amp; Saved
                               </span>
                               <h2 className="text-[20px] font-semibold">
-                                {currentRecord.status === "confirmed"
-                                  ? `Human-confirmed disposition: ${currentRecord.final_disposition?.toUpperCase()}`
-                                  : `Escalated to QA / X-ray: ${currentRecord.final_disposition?.toUpperCase()}`}
+                                Final Decision:{" "}
+                                {formatDispositionLabel(currentRecord.final_disposition)}
                               </h2>
                             </div>
                           </div>
-                          <div className="text-right font-mono text-[12px]">
-                            <div>ID: {currentRecord.id}</div>
-                            <div>Agreement: {currentRecord.human_agreement}</div>
+                          <div className="text-right text-[12px]">
+                            <div className="font-semibold">
+                              Reviewed by {formatOperatorName(currentRecord.reviewer_id)}
+                            </div>
+                            <div>{formatAgreementLabel(currentRecord.human_agreement)}</div>
                           </div>
                         </div>
                       ) : (
-                        <div className="px-6 py-4 bg-[#f1c21b] text-[#161616] border-b border-[#e0e0e0] flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex items-center gap-2.5">
-                            <ShieldAlert className="w-5 h-5 shrink-0" />
+                        <div className="px-6 py-4 bg-[#f1c21b] text-[#161616] border-b border-[#e0e0e0] flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <ShieldAlert className="w-6 h-6 shrink-0" />
                             <div>
-                              <span className="text-[12px] font-mono uppercase tracking-[0.32px] block">
-                                Step 3 of 5 · AI-suggested — pending operator confirmation
+                              <span className="text-[12px] font-semibold uppercase tracking-[0.32px] block">
+                                AI Suggestion · Waiting for Your Sign-Off
                               </span>
                               <h2 className="text-[18px] font-semibold">
-                                Review Gemma 4 findings before issuing final disposition
+                                {defectReviews.length === 0
+                                  ? "No visible issues found — Recommended: Pass"
+                                  : `AI flagged ${defectReviews.length} potential ${
+                                      defectReviews.length === 1 ? "issue" : "issues"
+                                    } — Recommended: ${formatDispositionLabel(
+                                      currentRecord.ai_result?.overall_disposition
+                                    )}`}
                               </h2>
                             </div>
                           </div>
-                          <span className="bg-[#161616] text-[#ffffff] px-2.5 py-1 text-[12px] font-mono">
-                            {currentRecord.ai_source === "live_gemma"
-                              ? "LIVE GEMMA 4"
-                              : currentRecord.ai_source === "cached_sample"
-                              ? "CACHED GEMMA 4"
-                              : "MANUAL FALLBACK"}
+                          <span className="bg-[#161616] text-[#ffffff] px-3 py-1 text-[12px] font-semibold">
+                            {formatAiSourceLabel(
+                              currentRecord.ai_source,
+                              currentRecord.ai_latency_ms
+                            )}
                           </span>
                         </div>
                       )}
 
-                      {/* Telemetry & Audit Strip */}
-                      <div className="px-6 py-3 bg-[#f4f4f4] border-b border-[#e0e0e0] grid grid-cols-2 sm:grid-cols-4 gap-3 text-[12px]">
+                      {/* Natural Summary Strip */}
+                      <div className="px-6 py-3.5 bg-[#f4f4f4] border-b border-[#e0e0e0] grid grid-cols-2 sm:grid-cols-4 gap-3 text-[13px]">
                         <div>
-                          <span className="text-[#525252] block">Inspection ID</span>
-                          <strong className="font-mono text-[#161616]">{currentRecord.id}</strong>
-                        </div>
-                        <div>
-                          <span className="text-[#525252] block">Model &amp; latency</span>
-                          <strong className="font-mono text-[#161616]">
-                            {currentRecord.model_id} ({currentRecord.ai_latency_ms}ms ·{" "}
-                            {currentRecord.ai_attempts} try)
+                          <span className="text-[12px] text-[#525252] block">Board Inspected</span>
+                          <strong className="text-[#161616]">
+                            {currentRecord.board_id} (Rev {currentRecord.board_revision})
                           </strong>
                         </div>
                         <div>
-                          <span className="text-[#525252] block">Image quality</span>
+                          <span className="text-[12px] text-[#525252] block">Photo Clarity</span>
                           <strong
-                            className={`font-mono uppercase ${
+                            className={`capitalize ${
                               currentRecord.ai_result?.image_quality === "acceptable"
                                 ? "text-[#24a148]"
                                 : "text-[#da1e28]"
                             }`}
                           >
-                            {currentRecord.ai_result?.image_quality || "manual"}
+                            {currentRecord.ai_result?.image_quality === "acceptable"
+                              ? "Clear & Acceptable"
+                              : currentRecord.ai_result?.image_quality || "Manual Check"}
                           </strong>
                         </div>
                         <div>
-                          <span className="text-[#525252] block">AI suggested disposition</span>
-                          <strong className="font-mono text-[#0f62fe]">
-                            {currentRecord.ai_result?.overall_disposition || "manual_entry"}
+                          <span className="text-[12px] text-[#525252] block">Issues Flagged</span>
+                          <strong className="text-[#161616]">
+                            {defectReviews.length === 0
+                              ? "None (Clean)"
+                              : `${defectReviews.length} ${
+                                  defectReviews.length === 1 ? "issue" : "issues"
+                                }`}
+                          </strong>
+                        </div>
+                        <div>
+                          <span className="text-[12px] text-[#525252] block">
+                            Suggested Outcome
+                          </span>
+                          <strong className="text-[#0f62fe]">
+                            {formatDispositionLabel(currentRecord.ai_result?.overall_disposition)}
                           </strong>
                         </div>
                       </div>
 
                       <div className="p-6 space-y-5">
-                        {/* Safety Routing Reasons / Fallback Notices */}
+                        {/* Plain-English Summary Note & Detected Board Markings */}
+                        {currentRecord.ai_result && (
+                          <div className="p-4 bg-[#f4f4f4] border border-[#e0e0e0] space-y-3 text-[13px]">
+                            <div>
+                              <span className="text-[12px] font-semibold text-[#525252] block mb-0.5">
+                                AI Visual Summary:
+                              </span>
+                              <p className="text-[#161616] leading-[1.5]">
+                                {currentRecord.ai_result.notes ||
+                                  "Visual scan completed. Please review the findings below."}
+                              </p>
+                            </div>
+
+                            {currentRecord.ai_result.visible_labels?.length > 0 && (
+                              <div className="pt-2 border-t border-[#e0e0e0] flex flex-wrap items-center gap-2">
+                                <span className="text-[12px] text-[#525252]">
+                                  Component labels read on board:
+                                </span>
+                                {currentRecord.ai_result.visible_labels.map((lbl, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="text-[12px] font-semibold bg-[#ffffff] border border-[#e0e0e0] px-2 py-0.5 text-[#161616]"
+                                  >
+                                    {lbl}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Safety Attention Notices (only if any) */}
                         {(currentRecord.routing_reasons?.length > 0 ||
                           currentRecord.ai_errors?.length > 0) && (
-                          <div className="p-4 bg-[#f4f4f4] border-l-4 border-[#0f62fe] space-y-1 text-[13px]">
+                          <div className="p-3.5 bg-[#f4f4f4] border-l-4 border-[#0f62fe] space-y-1 text-[13px]">
                             <p className="font-semibold text-[#161616]">
-                              Safety guardrail &amp; routing notices:
+                              Why closer human inspection is recommended:
                             </p>
                             {currentRecord.routing_reasons?.map((reason, i) => (
                               <p key={`r-${i}`} className="text-[#525252]">
@@ -1511,53 +1782,18 @@ export default function AOILiteBatamApp() {
                               </p>
                             ))}
                             {currentRecord.ai_errors?.map((err, i) => (
-                              <p key={`e-${i}`} className="text-[#da1e28] font-mono text-[12px]">
+                              <p key={`e-${i}`} className="text-[#da1e28] text-[12px]">
                                 • {err}
                               </p>
                             ))}
                           </div>
                         )}
 
-                        {/* OCR Visible Labels & AI Summary Notes */}
-                        {currentRecord.ai_result && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-[#f4f4f4] border border-[#e0e0e0] text-[13px]">
-                            <div>
-                              <span className="text-[12px] text-[#525252] block mb-1">
-                                Visible silkscreen / OCR labels detected:
-                              </span>
-                              {currentRecord.ai_result.visible_labels?.length > 0 ? (
-                                <div className="flex flex-wrap gap-1.5">
-                                  {currentRecord.ai_result.visible_labels.map((lbl, idx) => (
-                                    <span
-                                      key={idx}
-                                      className="font-mono text-[12px] bg-[#ffffff] border border-[#e0e0e0] px-2 py-0.5 text-[#161616]"
-                                    >
-                                      {lbl}
-                                    </span>
-                                  ))}
-                                </div>
-                              ) : (
-                                <span className="text-[#525252] italic">
-                                  No silkscreen text labels detected on this board view
-                                </span>
-                              )}
-                            </div>
-                            <div>
-                              <span className="text-[12px] text-[#525252] block mb-1">
-                                Gemma 4 inspection notes:
-                              </span>
-                              <p className="text-[#161616]">
-                                {currentRecord.ai_result.notes || "No additional notes."}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Per-Defect Review List */}
+                        {/* Per-Defect Findings List */}
                         <div className="space-y-4">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <h3 className="text-[18px] font-normal text-[#161616]">
-                              Defect findings &amp; human verification ({defectReviews.length})
+                              Inspection Findings ({defectReviews.length})
                             </h3>
                             {currentRecord.status !== "confirmed" &&
                               currentRecord.status !== "escalated" && (
@@ -1567,20 +1803,20 @@ export default function AOILiteBatamApp() {
                                   className="carbon-btn-tertiary !min-h-[38px] !py-1.5 !px-3 text-[13px] flex items-center gap-1.5"
                                 >
                                   <Plus className="w-4 h-4" />
-                                  <span>Add missed defect (false negative)</span>
+                                  <span>Report Another Issue</span>
                                 </button>
                               )}
                           </div>
 
                           {defectReviews.length === 0 ? (
                             <div className="p-6 border border-[#e0e0e0] bg-[#f4f4f4] text-center space-y-2">
-                              <CheckCircle2 className="w-7 h-7 text-[#24a148] mx-auto" />
-                              <p className="text-[15px] font-semibold text-[#161616]">
-                                Zero visible defects reported by Gemma 4
+                              <CheckCircle2 className="w-8 h-8 text-[#24a148] mx-auto" />
+                              <p className="text-[16px] font-semibold text-[#161616]">
+                                No visible defects detected on this board
                               </p>
-                              <p className="text-[13px] text-[#525252]">
-                                Visually inspect the board image to confirm no missing components, bridges, or shifts exist, or click{" "}
-                                <strong>Add missed defect</strong> above if you spot an anomaly.
+                              <p className="text-[13px] text-[#525252] max-w-lg mx-auto">
+                                Check the board photo to confirm all components and solder joints look clean. If you spot an issue the AI missed, click{" "}
+                                <strong>Report Another Issue</strong> above.
                               </p>
                             </div>
                           ) : (
@@ -1606,17 +1842,14 @@ export default function AOILiteBatamApp() {
                                   <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#e0e0e0] pb-3">
                                     <div className="space-y-1">
                                       <div className="flex flex-wrap items-center gap-2">
-                                        <span className="bg-[#161616] text-[#ffffff] text-[11px] font-mono px-2 py-0.5">
-                                          {aiDefect ? `AI FINDING #${idx + 1}` : `HUMAN ADDED #${idx + 1}`}
+                                        <span className="bg-[#161616] text-[#ffffff] text-[11px] font-semibold px-2 py-0.5">
+                                          {aiDefect ? `Finding #${idx + 1}` : `Added by Inspector`}
                                         </span>
-                                        <span className="text-[16px] font-semibold text-[#161616]">
-                                          {DEFECT_LABELS[rev.defect_class] || rev.defect_class}
-                                        </span>
-                                        <span className="font-mono text-[12px] text-[#525252]">
-                                          ({rev.defect_class})
+                                        <span className="text-[17px] font-semibold text-[#161616]">
+                                          {formatDefectClass(rev.defect_class)}
                                         </span>
                                         <span
-                                          className={`text-[11px] font-mono uppercase px-2 py-0.5 font-semibold ${
+                                          className={`text-[11px] px-2 py-0.5 font-semibold ${
                                             rev.severity === "high"
                                               ? "bg-[#da1e28] text-[#ffffff]"
                                               : rev.severity === "medium"
@@ -1624,26 +1857,27 @@ export default function AOILiteBatamApp() {
                                               : "bg-[#e0e0e0] text-[#161616]"
                                           }`}
                                         >
-                                          Severity: {rev.severity}
+                                          {SEVERITY_LABELS[rev.severity] || rev.severity}
                                         </span>
                                       </div>
                                       <p className="text-[13px] text-[#525252]">
-                                        <strong className="text-[#161616]">Location hint: </strong>
+                                        <strong className="text-[#161616]">Where on board: </strong>
                                         {rev.location_hint}
                                       </p>
                                     </div>
 
-                                    {/* Confidence Indicator Bar */}
+                                    {/* Friendly Confidence Pill & Bar */}
                                     {aiDefect && (
-                                      <div className="min-w-[160px] text-right">
-                                        <div className="flex items-center justify-between text-[12px] font-mono mb-1">
-                                          <span className="text-[#525252]">AI confidence</span>
+                                      <div className="min-w-[175px] text-right">
+                                        <div className="flex items-center justify-between text-[12px] mb-1">
+                                          <span className="text-[#525252]">AI Certainty</span>
                                           <strong
                                             className={
                                               isLowConf ? "text-[#da1e28]" : "text-[#161616]"
                                             }
                                           >
-                                            {confPct}% {isLowConf ? "(LOW)" : ""}
+                                            {confPct}%{" "}
+                                            {isLowConf ? "(Needs Closer Look)" : "(High Match)"}
                                           </strong>
                                         </div>
                                         <div className="w-full h-2 bg-[#e0e0e0]">
@@ -1658,32 +1892,34 @@ export default function AOILiteBatamApp() {
                                     )}
                                   </div>
 
-                                  {/* AI Visual Evidence & Recommended Action */}
+                                  {/* What the AI Saw & Suggested Action */}
                                   {aiDefect && (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[13px] bg-[#f4f4f4] p-3 border border-[#e0e0e0]">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[13px] bg-[#f4f4f4] p-3.5 border border-[#e0e0e0]">
                                       <div>
-                                        <span className="text-[11px] font-semibold uppercase tracking-[0.32px] text-[#525252] block mb-0.5">
-                                          Visual evidence
+                                        <span className="text-[11px] font-semibold uppercase tracking-[0.32px] text-[#525252] block mb-1">
+                                          What the AI Saw
                                         </span>
-                                        <p className="text-[#161616]">{aiDefect.evidence}</p>
+                                        <p className="text-[#161616] leading-[1.45]">
+                                          {aiDefect.evidence}
+                                        </p>
                                       </div>
                                       <div>
-                                        <span className="text-[11px] font-semibold uppercase tracking-[0.32px] text-[#525252] block mb-0.5">
-                                          Recommended next action
+                                        <span className="text-[11px] font-semibold uppercase tracking-[0.32px] text-[#525252] block mb-1">
+                                          Suggested Next Step
                                         </span>
-                                        <p className="text-[#161616]">
+                                        <p className="text-[#161616] leading-[1.45]">
                                           {aiDefect.recommended_action}
                                         </p>
                                       </div>
                                     </div>
                                   )}
 
-                                  {/* Inspector Action Controls: Accept / Edit / Reject / Escalate */}
+                                  {/* Friendly Inspector Decision Controls */}
                                   {!isLocked && (
                                     <div className="space-y-3 pt-1">
                                       <div className="flex flex-wrap items-center justify-between gap-2">
                                         <span className="text-[12px] font-semibold text-[#161616]">
-                                          Inspector decision for this finding:
+                                          Your decision on this finding:
                                         </span>
                                         {aiDefect === null && (
                                           <button
@@ -1692,7 +1928,7 @@ export default function AOILiteBatamApp() {
                                             className="text-[12px] text-[#da1e28] flex items-center gap-1 hover:underline"
                                           >
                                             <Trash2 className="w-3.5 h-3.5" />
-                                            <span>Remove added defect</span>
+                                            <span>Remove issue</span>
                                           </button>
                                         )}
                                       </div>
@@ -1702,23 +1938,27 @@ export default function AOILiteBatamApp() {
                                           [
                                             {
                                               act: "accept",
-                                              label: "Accept",
-                                              activeBg: "bg-[#24a148] text-[#ffffff] border-[#24a148]",
+                                              label: "Confirm Issue",
+                                              activeBg:
+                                                "bg-[#24a148] text-[#ffffff] border-[#24a148]",
                                             },
                                             {
                                               act: "edit",
-                                              label: "Edit class/loc",
-                                              activeBg: "bg-[#0f62fe] text-[#ffffff] border-[#0f62fe]",
+                                              label: "Edit Details",
+                                              activeBg:
+                                                "bg-[#0f62fe] text-[#ffffff] border-[#0f62fe]",
                                             },
                                             {
                                               act: "reject",
-                                              label: "Reject (false call)",
-                                              activeBg: "bg-[#da1e28] text-[#ffffff] border-[#da1e28]",
+                                              label: "Dismiss (False Alarm)",
+                                              activeBg:
+                                                "bg-[#da1e28] text-[#ffffff] border-[#da1e28]",
                                             },
                                             {
                                               act: "escalate",
-                                              label: "Escalate",
-                                              activeBg: "bg-[#f1c21b] text-[#161616] border-[#f1c21b]",
+                                              label: "Ask Senior QA",
+                                              activeBg:
+                                                "bg-[#f1c21b] text-[#161616] border-[#f1c21b]",
                                             },
                                           ] as const
                                         ).map((btn) => {
@@ -1730,7 +1970,7 @@ export default function AOILiteBatamApp() {
                                               onClick={() =>
                                                 updateDefectReview(idx, { action: btn.act })
                                               }
-                                              className={`min-h-[44px] px-3 py-2 text-[13px] font-semibold border transition-colors ${
+                                              className={`min-h-[42px] px-3 py-2 text-[13px] font-semibold border transition-colors ${
                                                 active
                                                   ? btn.activeBg
                                                   : "bg-[#f4f4f4] text-[#161616] border-[#e0e0e0] hover:bg-[#e0e0e0]"
@@ -1742,12 +1982,12 @@ export default function AOILiteBatamApp() {
                                         })}
                                       </div>
 
-                                      {/* Show inline class/severity/location editors when 'edit' or human-added */}
+                                      {/* Inline editors when 'edit' or human-added */}
                                       {(rev.action === "edit" || rev.ai_index === null) && (
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-[#f4f4f4] border border-[#e0e0e0]">
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-[#f4f4f4] border border-[#e0e0e0]">
                                           <div>
-                                            <label className="block text-[11px] text-[#525252] mb-1">
-                                              Confirmed defect class (6 allowed)
+                                            <label className="block text-[12px] text-[#525252] mb-1">
+                                              Issue Type
                                             </label>
                                             <select
                                               value={rev.defect_class}
@@ -1756,18 +1996,18 @@ export default function AOILiteBatamApp() {
                                                   defect_class: e.target.value as DefectClass,
                                                 })
                                               }
-                                              className="carbon-input w-full text-[13px]"
+                                              className="carbon-input w-full text-[13px] bg-[#ffffff]"
                                             >
                                               {Object.entries(DEFECT_LABELS).map(([k, v]) => (
                                                 <option key={k} value={k}>
-                                                  {v} ({k})
+                                                  {v}
                                                 </option>
                                               ))}
                                             </select>
                                           </div>
                                           <div>
-                                            <label className="block text-[11px] text-[#525252] mb-1">
-                                              Confirmed severity
+                                            <label className="block text-[12px] text-[#525252] mb-1">
+                                              Priority / Severity
                                             </label>
                                             <select
                                               value={rev.severity}
@@ -1776,16 +2016,16 @@ export default function AOILiteBatamApp() {
                                                   severity: e.target.value as Severity,
                                                 })
                                               }
-                                              className="carbon-input w-full text-[13px]"
+                                              className="carbon-input w-full text-[13px] bg-[#ffffff]"
                                             >
-                                              <option value="low">low</option>
-                                              <option value="medium">medium</option>
-                                              <option value="high">high</option>
+                                              <option value="low">Low Priority</option>
+                                              <option value="medium">Medium Priority</option>
+                                              <option value="high">High Priority</option>
                                             </select>
                                           </div>
                                           <div>
-                                            <label className="block text-[11px] text-[#525252] mb-1">
-                                              Location hint
+                                            <label className="block text-[12px] text-[#525252] mb-1">
+                                              Location on Board
                                             </label>
                                             <input
                                               type="text"
@@ -1795,7 +2035,7 @@ export default function AOILiteBatamApp() {
                                                   location_hint: e.target.value,
                                                 })
                                               }
-                                              className="carbon-input w-full text-[13px]"
+                                              className="carbon-input w-full text-[13px] bg-[#ffffff]"
                                             />
                                           </div>
                                         </div>
@@ -1808,86 +2048,133 @@ export default function AOILiteBatamApp() {
                           )}
                         </div>
 
-                        {/* Collapsible Raw JSON Drawer */}
+                        {/* Collapsible Technical & Audit Details Accordion (Progressive Disclosure) */}
                         <div className="border-t border-[#e0e0e0] pt-3">
                           <button
                             type="button"
-                            onClick={() => setShowRawJson((v) => !v)}
-                            className="text-[13px] font-mono text-[#0f62fe] flex items-center gap-1.5 hover:underline"
+                            onClick={() => setShowTechDetails((v) => !v)}
+                            className="text-[13px] text-[#525252] hover:text-[#0f62fe] flex items-center gap-1.5"
                           >
-                            {showRawJson ? (
+                            {showTechDetails ? (
                               <ChevronDown className="w-4 h-4" />
                             ) : (
                               <ChevronRight className="w-4 h-4" />
                             )}
                             <span>
-                              {showRawJson
-                                ? "Hide strict JSON schema payload"
-                                : "Inspect strict Gemma 4 JSON schema output"}
+                              {showTechDetails
+                                ? "Hide technical & audit details"
+                                : "Show technical & audit details (Model ID, SHA-256 hash, raw JSON)"}
                             </span>
                           </button>
-                          {showRawJson && (
-                            <pre className="mt-2 p-4 bg-[#161616] text-[#f4f4f4] font-mono text-[12px] overflow-x-auto max-h-[280px]">
-                              {JSON.stringify(currentRecord.ai_result, null, 2)}
-                            </pre>
+
+                          {showTechDetails && (
+                            <div className="mt-3 p-4 bg-[#f4f4f4] border border-[#e0e0e0] space-y-3 text-[12px]">
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div>
+                                  <span className="text-[#525252] block">Record ID</span>
+                                  <strong className="font-mono text-[#161616]">
+                                    {currentRecord.id}
+                                  </strong>
+                                </div>
+                                <div>
+                                  <span className="text-[#525252] block">AI Model</span>
+                                  <strong className="font-mono text-[#161616]">
+                                    {currentRecord.model_id}
+                                  </strong>
+                                </div>
+                                <div>
+                                  <span className="text-[#525252] block">Prompt Version</span>
+                                  <strong className="font-mono text-[#161616]">
+                                    {currentRecord.prompt_version} ({currentRecord.prompt_sha})
+                                  </strong>
+                                </div>
+                                <div>
+                                  <span className="text-[#525252] block">Response Time</span>
+                                  <strong className="font-mono text-[#161616]">
+                                    {currentRecord.ai_latency_ms} ms ({currentRecord.ai_attempts}{" "}
+                                    attempt)
+                                  </strong>
+                                </div>
+                              </div>
+
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowRawJson((v) => !v)}
+                                  className="text-[12px] font-mono text-[#0f62fe] hover:underline flex items-center gap-1"
+                                >
+                                  {showRawJson ? (
+                                    <ChevronDown className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <ChevronRight className="w-3.5 h-3.5" />
+                                  )}
+                                  <span>
+                                    {showRawJson ? "Hide raw JSON output" : "View raw JSON output"}
+                                  </span>
+                                </button>
+                                {showRawJson && (
+                                  <pre className="mt-2 p-3 bg-[#161616] text-[#f4f4f4] font-mono text-[11px] overflow-x-auto max-h-[240px]">
+                                    {JSON.stringify(currentRecord.ai_result, null, 2)}
+                                  </pre>
+                                )}
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    {/* STEP 4 CARD: FINAL HUMAN DISPOSITION & SIGN-OFF */}
+                    {/* FINAL SIGN-OFF CARD */}
                     {currentRecord.status !== "confirmed" &&
                     currentRecord.status !== "escalated" ? (
                       <div className="border border-[#e0e0e0] bg-[#ffffff]">
                         <div className="px-6 py-4 bg-[#f4f4f4] border-b border-[#e0e0e0]">
-                          <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                            Step 4 of 5 · Mandatory human-in-the-loop gate
+                          <span className="text-[12px] font-semibold text-[#0f62fe] block">
+                            Step 3 of 3 · Inspector Sign-Off
                           </span>
-                          <h2 className="text-[20px] font-normal leading-[1.40] text-[#161616]">
-                            Confirm final board disposition
+                          <h2 className="text-[20px] font-normal text-[#161616]">
+                            Confirm final board decision
                           </h2>
                         </div>
 
                         <div className="p-6 space-y-5">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {(["pass", "rework", "quarantine", "escalate"] as FinalDisposition[]).map(
-                              (disp) => {
-                                const info = DISPOSITION_INFO[disp];
-                                const active = finalDisposition === disp;
-                                return (
-                                  <button
-                                    key={disp}
-                                    type="button"
-                                    onClick={() => setFinalDisposition(disp)}
-                                    className={`p-4 text-left border-2 transition-colors ${
-                                      active
-                                        ? `${info.borderColor} ${info.bgColor} ${info.textColor}`
-                                        : "border-[#e0e0e0] bg-[#f4f4f4] text-[#161616] hover:bg-[#e0e0e0]"
+                            {(
+                              ["pass", "rework", "quarantine", "escalate"] as FinalDisposition[]
+                            ).map((disp) => {
+                              const info = DISPOSITION_INFO[disp];
+                              const active = finalDisposition === disp;
+                              return (
+                                <button
+                                  key={disp}
+                                  type="button"
+                                  onClick={() => setFinalDisposition(disp)}
+                                  className={`p-4 text-left border-2 transition-colors ${
+                                    active
+                                      ? `${info.borderColor} ${info.bgColor} ${info.textColor}`
+                                      : "border-[#e0e0e0] bg-[#f4f4f4] text-[#161616] hover:bg-[#e0e0e0]"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-[15px] font-semibold">{info.label}</span>
+                                    {active && <Check className="w-4 h-4 shrink-0" />}
+                                  </div>
+                                  <p
+                                    className={`text-[12px] ${
+                                      active ? "opacity-90" : "text-[#525252]"
                                     }`}
                                   >
-                                    <div className="flex items-center justify-between mb-1">
-                                      <span className="text-[15px] font-semibold">
-                                        {info.label}
-                                      </span>
-                                      {active && <Check className="w-4 h-4 shrink-0" />}
-                                    </div>
-                                    <p
-                                      className={`text-[12px] ${
-                                        active ? "opacity-90" : "text-[#525252]"
-                                      }`}
-                                    >
-                                      {info.desc}
-                                    </p>
-                                  </button>
-                                );
-                              }
-                            )}
+                                    {info.desc}
+                                  </p>
+                                </button>
+                              );
+                            })}
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-[12px] tracking-[0.32px] text-[#525252] mb-1">
-                                Verifying operator / QA reviewer
+                              <label className="block text-[12px] text-[#525252] mb-1">
+                                Signed Off By (Inspector / QA)
                               </label>
                               <select
                                 value={reviewerId}
@@ -1903,22 +2190,22 @@ export default function AOILiteBatamApp() {
                                   ]
                                 ).map((op) => (
                                   <option key={op} value={op}>
-                                    {op}
+                                    {formatOperatorName(op)}
                                   </option>
                                 ))}
                               </select>
                             </div>
 
                             <div>
-                              <label className="block text-[12px] tracking-[0.32px] text-[#525252] mb-1">
-                                Operator disposition notes (optional)
+                              <label className="block text-[12px] text-[#525252] mb-1">
+                                Inspector Notes (Optional)
                               </label>
                               <input
                                 type="text"
                                 value={reviewNotes}
                                 onChange={(e) => setReviewNotes(e.target.value)}
                                 className="carbon-input w-full text-[14px]"
-                                placeholder="e.g., Confirmed bridge on U2 pins; routed to rework"
+                                placeholder="e.g., Confirmed solder bridge on U2; sent to touch-up"
                               />
                             </div>
                           </div>
@@ -1931,7 +2218,7 @@ export default function AOILiteBatamApp() {
 
                           <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
                             <span className="text-[12px] text-[#525252]">
-                              Both the original Gemma 4 output and your confirmed human decision will be stored in Supabase PostgreSQL.
+                              Saves both the AI suggestion and your final decision to the quality log.
                             </span>
                             <button
                               type="button"
@@ -1942,26 +2229,29 @@ export default function AOILiteBatamApp() {
                               <CheckCircle2 className="w-4 h-4" />
                               <span>
                                 {isSavingReview
-                                  ? "Saving verified record..."
-                                  : "Confirm final disposition & save record"}
+                                  ? "Saving quality record..."
+                                  : "Confirm & Complete Inspection"}
                               </span>
                             </button>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      /* STEP 5 CARD: POST-CONFIRMATION SUMMARY & NEXT ACTIONS */
-                      <div className="border border-[#24a148] bg-[#f4f4f4] p-6 space-y-4">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div>
+                      /* POST-CONFIRMATION SUMMARY CARD */
+                      <div className="border-2 border-[#24a148] bg-[#f4f4f4] p-6 space-y-4">
+                        <div className="flex flex-wrap items-center justify-between gap-4">
+                          <div className="space-y-1">
                             <h3 className="text-[20px] font-semibold text-[#161616]">
-                              Quality record verified &amp; committed ({currentRecord.id})
+                              Inspection saved to Quality Log
                             </h3>
                             <p className="text-[14px] text-[#525252]">
-                              Signed off by <strong>{currentRecord.reviewer_id}</strong> in{" "}
-                              <strong>{currentRecord.doc_time_s ?? elapsedDocSec}s</strong> · Human-AI agreement:{" "}
-                              <strong className="uppercase text-[#161616]">
-                                {currentRecord.human_agreement}
+                              Signed off by{" "}
+                              <strong className="text-[#161616]">
+                                {formatOperatorName(currentRecord.reviewer_id)}
+                              </strong>{" "}
+                              in <strong>{currentRecord.doc_time_s ?? elapsedDocSec}s</strong> ·{" "}
+                              <strong className="text-[#161616]">
+                                {formatAgreementLabel(currentRecord.human_agreement)}
                               </strong>
                             </p>
                           </div>
@@ -1972,7 +2262,7 @@ export default function AOILiteBatamApp() {
                               className="carbon-btn-primary flex items-center gap-2 font-semibold"
                             >
                               <Plus className="w-4 h-4" />
-                              <span>Inspect next board</span>
+                              <span>Inspect Next Board</span>
                             </button>
                             <button
                               type="button"
@@ -1983,7 +2273,7 @@ export default function AOILiteBatamApp() {
                               className="carbon-btn-secondary flex items-center gap-2"
                             >
                               <Database className="w-4 h-4" />
-                              <span>View in quality log</span>
+                              <span>View in Quality Log</span>
                             </button>
                           </div>
                         </div>
@@ -1997,35 +2287,40 @@ export default function AOILiteBatamApp() {
         )}
 
         {/* =================================================================== */}
-        {/* TAB 2: QUALITY RECORDS BROWSER & AUDIT DRAWER                       */}
+        {/* TAB 2: QUALITY LOG & SUMMARY DRAWER (HUMAN-READABLE)                */}
         {/* =================================================================== */}
         {activeTab === "records" && (
           <div className="space-y-6">
             <div className="border border-[#e0e0e0] bg-[#ffffff] p-6 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-[14px] text-[#0f62fe] mb-1">
-                  Traceability &amp; audit log · Supabase PostgreSQL + local mirror
+                <p className="text-[13px] text-[#0f62fe] mb-1">
+                   Traceable Board Inspection History · Batam SMT &amp; SMK Lab Log
                 </p>
-                <h1 className="text-[32px] font-light text-[#161616]">
-                  Inspection quality records ({filteredRecords.length})
+                <h1 className="text-[28px] lg:text-[32px] font-light text-[#161616]">
+                  Quality Inspection Log ({filteredRecords.length})
                 </h1>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center border border-[#e0e0e0] bg-[#f4f4f4]">
                   <Filter className="w-4 h-4 text-[#525252] ml-3 mr-1" />
-                  {["all", "pending_review", "confirmed", "escalated"].map((st) => (
+                  {[
+                    { id: "all", label: "All Records" },
+                    { id: "pending_review", label: "Needs Review" },
+                    { id: "confirmed", label: "Verified" },
+                    { id: "escalated", label: "Escalated to QA" },
+                  ].map((st) => (
                     <button
-                      key={st}
+                      key={st.id}
                       type="button"
-                      onClick={() => setRecordStatusFilter(st)}
-                      className={`min-h-[40px] px-3 py-1.5 text-[12px] tracking-[0.32px] ${
-                        recordStatusFilter === st
+                      onClick={() => setRecordStatusFilter(st.id)}
+                      className={`min-h-[40px] px-3 py-1.5 text-[12px] transition-colors ${
+                        recordStatusFilter === st.id
                           ? "bg-[#0f62fe] text-[#ffffff] font-semibold"
                           : "text-[#161616] hover:bg-[#e0e0e0]"
                       }`}
                     >
-                      {st.replace("_", " ")}
+                      {st.label}
                     </button>
                   ))}
                 </div>
@@ -2035,20 +2330,20 @@ export default function AOILiteBatamApp() {
                   className="carbon-btn-primary !min-h-[40px] !py-2 flex items-center gap-1.5"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Download CSV</span>
+                  <span>Download Spreadsheet (CSV)</span>
                 </a>
                 <a
                   href="/api/export/json"
                   className="carbon-btn-secondary !min-h-[40px] !py-2 flex items-center gap-1.5"
                 >
                   <FileJson className="w-4 h-4" />
-                  <span>Download JSON</span>
+                  <span>Download Audit JSON</span>
                 </a>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Records Table */}
+              {/* Human-Readable Quality Log Table */}
               <div
                 className={`${
                   selectedRecordDetail ? "lg:col-span-7" : "lg:col-span-12"
@@ -2057,76 +2352,91 @@ export default function AOILiteBatamApp() {
                 {filteredRecords.length === 0 ? (
                   <div className="p-12 text-center text-[#525252] space-y-3">
                     <p className="text-[16px] text-[#161616]">
-                      No inspection records match the current filter.
+                      No inspection records match the selected filter.
                     </p>
                     <button
                       type="button"
                       onClick={() => setActiveTab("inspect")}
                       className="carbon-btn-primary"
                     >
-                      Go to inspect station
+                      Go to Inspector Station
                     </button>
                   </div>
                 ) : (
                   <table className="w-full text-left border-collapse text-[13px]">
                     <thead>
-                      <tr className="bg-[#f4f4f4] border-b border-[#e0e0e0] text-[#525252] text-[12px] tracking-[0.32px]">
-                        <th className="p-3.5 font-semibold">Inspection ID</th>
-                        <th className="p-3.5 font-semibold">Board / Station</th>
-                        <th className="p-3.5 font-semibold">AI Source</th>
-                        <th className="p-3.5 font-semibold">Status</th>
-                        <th className="p-3.5 font-semibold">Final Disposition</th>
-                        <th className="p-3.5 font-semibold">Agreement</th>
+                      <tr className="bg-[#f4f4f4] border-b border-[#e0e0e0] text-[#525252] text-[12px]">
+                        <th className="p-3.5 font-semibold">Time &amp; Shift</th>
+                        <th className="p-3.5 font-semibold">Board &amp; Station</th>
+                        <th className="p-3.5 font-semibold">Inspection Findings</th>
+                        <th className="p-3.5 font-semibold">Final Decision</th>
+                        <th className="p-3.5 font-semibold">Inspector &amp; Review</th>
                         <th className="p-3.5 font-semibold">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#e0e0e0]">
                       {filteredRecords.map((rec) => {
                         const isSelected = selectedRecordDetail?.id === rec.id;
+                        const dt = formatFriendlyDateTime(rec.created_at);
+                        const statusBadge = formatStatusBadge(rec.status);
+                        const dispInfo =
+                          rec.final_disposition && rec.final_disposition in DISPOSITION_INFO
+                            ? DISPOSITION_INFO[rec.final_disposition]
+                            : null;
+
                         return (
                           <tr
                             key={rec.id}
-                            onClick={() => setSelectedRecordDetail(rec)}
+                            onClick={() => {
+                              setSelectedRecordDetail(rec);
+                              setShowDrawerTechAudit(false);
+                            }}
                             className={`cursor-pointer transition-colors ${
                               isSelected ? "bg-[#f4f4f4]" : "hover:bg-[#f4f4f4]"
                             }`}
                           >
-                            <td className="p-3.5 font-mono text-[12px] text-[#161616]">
-                              <div>{rec.id}</div>
+                            <td className="p-3.5 text-[#161616]">
+                              <div className="font-semibold">{dt.time}</div>
                               <div className="text-[11px] text-[#525252]">
-                                {new Date(rec.created_at).toLocaleTimeString()}
+                                {dt.date} · {rec.shift}
                               </div>
                             </td>
                             <td className="p-3.5">
                               <div className="font-semibold text-[#161616]">
                                 {rec.board_id} (Rev {rec.board_revision})
                               </div>
-                              <div className="text-[12px] text-[#525252]">{rec.line_station}</div>
+                              <div className="text-[12px] text-[#525252]">
+                                {formatLineStation(rec.line_station)}
+                              </div>
                             </td>
-                            <td className="p-3.5 font-mono text-[12px]">
-                              {rec.ai_source}
+                            <td className="p-3.5 text-[#161616]">
+                              <div className="font-semibold">{summarizeRecordFindings(rec)}</div>
                               <div className="text-[11px] text-[#525252]">
-                                {rec.ai_latency_ms}ms
+                                {formatInspectionStage(rec.inspection_type)}
                               </div>
                             </td>
                             <td className="p-3.5">
-                              <span
-                                className={`inline-block px-2 py-0.5 text-[11px] font-mono font-semibold uppercase ${
-                                  rec.status === "confirmed"
-                                    ? "bg-[#24a148] text-[#ffffff]"
-                                    : rec.status === "escalated"
-                                    ? "bg-[#f1c21b] text-[#161616]"
-                                    : "bg-[#e0e0e0] text-[#161616]"
-                                }`}
-                              >
-                                {rec.status}
-                              </span>
+                              {dispInfo ? (
+                                <span
+                                  className={`inline-block px-2.5 py-0.5 text-[12px] font-semibold ${dispInfo.badgeBg} ${dispInfo.badgeText}`}
+                                >
+                                  {dispInfo.shortLabel}
+                                </span>
+                              ) : (
+                                <span
+                                  className={`inline-block px-2.5 py-0.5 text-[12px] font-semibold ${statusBadge.bg} ${statusBadge.text}`}
+                                >
+                                  {statusBadge.label}
+                                </span>
+                              )}
                             </td>
-                            <td className="p-3.5 font-mono uppercase font-semibold text-[#161616]">
-                              {rec.final_disposition || "—"}
-                            </td>
-                            <td className="p-3.5 font-mono text-[12px]">
-                              {rec.human_agreement || "pending"}
+                            <td className="p-3.5">
+                              <div className="text-[#161616] font-semibold">
+                                {formatOperatorName(rec.reviewer_id || rec.operator_id)}
+                              </div>
+                              <div className="text-[11px] text-[#525252]">
+                                {formatAgreementLabel(rec.human_agreement)}
+                              </div>
                             </td>
                             <td className="p-3.5">
                               {rec.status === "pending_review" ||
@@ -2138,13 +2448,13 @@ export default function AOILiteBatamApp() {
                                     initializeReviewFromRecord(rec);
                                     setActiveTab("inspect");
                                   }}
-                                  className="px-2.5 py-1 bg-[#0f62fe] text-[#ffffff] text-[12px]"
+                                  className="px-3 py-1.5 bg-[#0f62fe] text-[#ffffff] text-[12px] font-semibold hover:bg-[#0050e6]"
                                 >
-                                  Resume review
+                                  Review Now
                                 </button>
                               ) : (
-                                <span className="text-[12px] text-[#0f62fe] hover:underline">
-                                  Inspect audit
+                                <span className="text-[12px] font-semibold text-[#0f62fe] hover:underline">
+                                  View Summary
                                 </span>
                               )}
                             </td>
@@ -2156,22 +2466,28 @@ export default function AOILiteBatamApp() {
                 )}
               </div>
 
-              {/* Record Audit Detail Panel */}
+              {/* Human-Readable Record Summary Drawer */}
               {selectedRecordDetail && (
-                <div className="lg:col-span-5 border border-[#e0e0e0] bg-[#ffffff] p-6 space-y-4">
+                <div className="lg:col-span-5 border border-[#e0e0e0] bg-[#ffffff] p-6 space-y-5">
                   <div className="flex items-start justify-between border-b border-[#e0e0e0] pb-3">
                     <div>
-                      <span className="text-[11px] font-mono text-[#525252]">
-                        AUDIT RECORD TRACEABILITY
+                      <span className="text-[12px] font-semibold text-[#0f62fe] block">
+                        Inspection Summary
                       </span>
                       <h3 className="text-[20px] font-semibold text-[#161616]">
-                        {selectedRecordDetail.id}
+                        Board {selectedRecordDetail.board_id} (Rev{" "}
+                        {selectedRecordDetail.board_revision})
                       </h3>
+                      <p className="text-[12px] text-[#525252]">
+                        {formatLineStation(selectedRecordDetail.line_station)} ·{" "}
+                        {formatInspectionStage(selectedRecordDetail.inspection_type)}
+                      </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setSelectedRecordDetail(null)}
                       className="text-[#525252] hover:text-[#161616]"
+                      title="Close summary"
                     >
                       <XCircle className="w-5 h-5" />
                     </button>
@@ -2184,74 +2500,161 @@ export default function AOILiteBatamApp() {
                         <img
                           src={selectedRecordDetail.image_filename}
                           alt={selectedRecordDetail.board_id}
-                          className="w-full max-h-[200px] object-contain mx-auto"
+                          className="w-full max-h-[210px] object-contain mx-auto"
                         />
                       </div>
                     )}
 
+                  {/* AI Suggestion vs. Operator Decision Comparison */}
+                  <div className="space-y-2 text-[13px]">
+                    <h4 className="font-semibold text-[#161616]">
+                      AI Suggestion vs. Final Inspector Decision
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3.5 border border-[#e0e0e0] bg-[#f4f4f4]">
+                        <span className="text-[11px] font-semibold uppercase text-[#525252] block">
+                          Initial AI Suggestion
+                        </span>
+                        <p className="font-semibold text-[#0f62fe] text-[15px] mt-1">
+                          {formatDispositionLabel(
+                            selectedRecordDetail.original_ai_disposition ||
+                              selectedRecordDetail.ai_result?.overall_disposition
+                          )}
+                        </p>
+                        <p className="text-[12px] text-[#525252] mt-1">
+                          Flagged issues: {selectedRecordDetail.ai_result?.defects?.length || 0}
+                        </p>
+                      </div>
+                      <div className="p-3.5 border border-[#e0e0e0] bg-[#f4f4f4]">
+                        <span className="text-[11px] font-semibold uppercase text-[#525252] block">
+                          Final Inspector Decision
+                        </span>
+                        <p className="font-semibold text-[#24a148] text-[15px] mt-1">
+                          {formatDispositionLabel(selectedRecordDetail.final_disposition)}
+                        </p>
+                        <p className="text-[12px] text-[#525252] mt-1">
+                          Confirmed issues: {selectedRecordDetail.final_defects?.length ?? "—"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Confirmed Findings List */}
+                  {selectedRecordDetail.final_defects &&
+                    selectedRecordDetail.final_defects.length > 0 && (
+                      <div className="space-y-2 text-[13px]">
+                        <h4 className="font-semibold text-[#161616]">Confirmed Issues on Board</h4>
+                        <div className="space-y-2">
+                          {selectedRecordDetail.final_defects.map((fd, i) => (
+                            <div
+                              key={i}
+                              className="p-3 bg-[#f4f4f4] border border-[#e0e0e0] flex items-start justify-between gap-2"
+                            >
+                              <div>
+                                <strong className="text-[#161616] block">
+                                  {formatDefectClass(fd.defect_class)}
+                                </strong>
+                                <span className="text-[12px] text-[#525252]">
+                                  Location: {fd.location_hint}
+                                </span>
+                              </div>
+                              <span className="text-[11px] font-semibold px-2 py-0.5 bg-[#ffffff] border border-[#e0e0e0]">
+                                {SEVERITY_LABELS[fd.severity as Severity] || fd.severity}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Inspector Details */}
                   <div className="grid grid-cols-2 gap-3 text-[12px] bg-[#f4f4f4] p-4 border border-[#e0e0e0]">
                     <div>
-                      <span className="text-[#525252] block">Board ID</span>
-                      <strong className="font-mono">{selectedRecordDetail.board_id}</strong>
-                    </div>
-                    <div>
-                      <span className="text-[#525252] block">Shift</span>
-                      <strong>{selectedRecordDetail.shift}</strong>
-                    </div>
-                    <div>
-                      <span className="text-[#525252] block">Operator</span>
-                      <strong>{selectedRecordDetail.operator_id}</strong>
-                    </div>
-                    <div>
-                      <span className="text-[#525252] block">Reviewer</span>
-                      <strong>{selectedRecordDetail.reviewer_id || "Pending"}</strong>
-                    </div>
-                    <div>
-                      <span className="text-[#525252] block">Model &amp; Prompt</span>
-                      <strong className="font-mono">
-                        {selectedRecordDetail.model_id} ({selectedRecordDetail.prompt_version})
+                      <span className="text-[#525252] block">Station Operator</span>
+                      <strong className="text-[#161616]">
+                        {formatOperatorName(selectedRecordDetail.operator_id)}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-[#525252] block">Image SHA-256</span>
-                      <strong className="font-mono">
-                        {selectedRecordDetail.image_sha256
-                          ? `${selectedRecordDetail.image_sha256.slice(0, 16)}...`
-                          : "N/A"}
+                      <span className="text-[#525252] block">Signed Off By</span>
+                      <strong className="text-[#161616]">
+                        {selectedRecordDetail.reviewer_id
+                          ? formatOperatorName(selectedRecordDetail.reviewer_id)
+                          : "Waiting for Sign-Off"}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-[#525252] block">Shift &amp; Time</span>
+                      <strong className="text-[#161616]">
+                        {selectedRecordDetail.shift} ·{" "}
+                        {formatFriendlyDateTime(selectedRecordDetail.created_at).time}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-[#525252] block">Review Duration</span>
+                      <strong className="text-[#161616]">
+                        {selectedRecordDetail.doc_time_s
+                          ? `${selectedRecordDetail.doc_time_s} seconds`
+                          : "In progress"}
                       </strong>
                     </div>
                   </div>
 
-                  <div className="space-y-2 text-[13px]">
-                    <h4 className="font-semibold text-[#161616]">
-                      AI suggestion vs. Human confirmed decision
-                    </h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 border border-[#e0e0e0] bg-[#f4f4f4]">
-                        <span className="text-[11px] font-mono text-[#525252] block">
-                          ORIGINAL AI SUGGESTION
-                        </span>
-                        <p className="font-mono font-semibold text-[#0f62fe] mt-1">
-                          {selectedRecordDetail.original_ai_disposition ||
-                            selectedRecordDetail.ai_result?.overall_disposition ||
-                            "manual"}
-                        </p>
-                        <p className="text-[12px] text-[#525252] mt-1">
-                          AI defects: {selectedRecordDetail.ai_result?.defects?.length || 0}
-                        </p>
-                      </div>
-                      <div className="p-3 border border-[#e0e0e0] bg-[#f4f4f4]">
-                        <span className="text-[11px] font-mono text-[#525252] block">
-                          FINAL HUMAN DISPOSITION
-                        </span>
-                        <p className="font-mono font-semibold text-[#24a148] uppercase mt-1">
-                          {selectedRecordDetail.final_disposition || "PENDING"}
-                        </p>
-                        <p className="text-[12px] text-[#525252] mt-1">
-                          Confirmed defects: {selectedRecordDetail.final_defects?.length ?? "—"}
-                        </p>
-                      </div>
+                  {selectedRecordDetail.review_notes && (
+                    <div className="p-3 bg-[#f4f4f4] border-l-4 border-[#0f62fe] text-[12px]">
+                      <span className="text-[#525252] block font-semibold">Inspector Note:</span>
+                      <p className="text-[#161616] mt-0.5">{selectedRecordDetail.review_notes}</p>
                     </div>
+                  )}
+
+                  {/* Collapsible Technical Audit Trail */}
+                  <div className="border-t border-[#e0e0e0] pt-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowDrawerTechAudit((v) => !v)}
+                      className="text-[12px] text-[#525252] hover:text-[#0f62fe] flex items-center gap-1"
+                    >
+                      {showDrawerTechAudit ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                      <span>
+                        {showDrawerTechAudit
+                          ? "Hide technical audit trail"
+                          : "View technical audit trail (Record ID, Model, SHA-256)"}
+                      </span>
+                    </button>
+
+                    {showDrawerTechAudit && (
+                      <div className="mt-2 p-3 bg-[#f4f4f4] border border-[#e0e0e0] space-y-1.5 text-[11px] font-mono text-[#525252]">
+                        <div>
+                          Record ID:{" "}
+                          <strong className="text-[#161616]">{selectedRecordDetail.id}</strong>
+                        </div>
+                        <div>
+                          AI Source:{" "}
+                          <strong className="text-[#161616]">
+                            {selectedRecordDetail.ai_source} ({selectedRecordDetail.ai_latency_ms}ms)
+                          </strong>
+                        </div>
+                        <div>
+                          Model &amp; Prompt:{" "}
+                          <strong className="text-[#161616]">
+                            {selectedRecordDetail.model_id} · {selectedRecordDetail.prompt_version} (
+                            {selectedRecordDetail.prompt_sha})
+                          </strong>
+                        </div>
+                        <div>
+                          Image SHA-256:{" "}
+                          <strong className="text-[#161616]">
+                            {selectedRecordDetail.image_sha256
+                              ? `${selectedRecordDetail.image_sha256.slice(0, 24)}...`
+                              : "Sample reference"}
+                          </strong>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -2260,17 +2663,17 @@ export default function AOILiteBatamApp() {
         )}
 
         {/* =================================================================== */}
-        {/* TAB 3: LEAN SIX SIGMA (DMAIC) DASHBOARD                             */}
+        {/* TAB 3: SHOP-FLOOR QUALITY ANALYTICS (HUMAN-READABLE)                */}
         {/* =================================================================== */}
         {activeTab === "dashboard" && (
           <div className="space-y-6">
             <div className="border border-[#e0e0e0] bg-[#ffffff] p-6 lg:p-8 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-[14px] text-[#0f62fe] mb-1">
-                  Lean Six Sigma quality telemetry · Define · Measure · Analyze · Improve · Control
+                <p className="text-[13px] text-[#0f62fe] mb-1">
+                  Line Quality &amp; Inspection Performance Overview
                 </p>
-                <h1 className="text-[32px] lg:text-[42px] font-light text-[#161616]">
-                  SMT inspection DMAIC dashboard
+                <h1 className="text-[28px] lg:text-[36px] font-light text-[#161616]">
+                  Quality &amp; Line Analytics
                 </h1>
               </div>
               <button
@@ -2279,39 +2682,59 @@ export default function AOILiteBatamApp() {
                 className="carbon-btn-tertiary flex items-center gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
-                <span>Refresh telemetry</span>
+                <span>Refresh Data</span>
               </button>
             </div>
 
-            {/* 8 KPI Tiles */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 6 Clear, Human-Readable Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="border border-[#e0e0e0] bg-[#ffffff] p-5">
-                <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                  Total inspections logged
+                <span className="text-[13px] font-semibold text-[#525252] block">
+                  Total Boards Inspected
                 </span>
                 <p className="text-[36px] font-light text-[#161616] mt-1">
                   {stats?.counts.total ?? 0}
                 </p>
                 <span className="text-[12px] text-[#525252]">
-                  {stats?.counts.human_verified ?? 0} human-verified
+                  {stats?.counts.human_verified ?? 0} verified and signed off by inspectors
                 </span>
               </div>
 
               <div className="border border-[#e0e0e0] bg-[#f4f4f4] p-5">
-                <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                  Pending human review
+                <span className="text-[13px] font-semibold text-[#525252] block">
+                  Waiting for Inspector Sign-Off
                 </span>
                 <p className="text-[36px] font-light text-[#da1e28] mt-1">
                   {stats?.counts.pending_review ?? 0}
                 </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRecordStatusFilter("pending_review");
+                    setActiveTab("records");
+                  }}
+                  className="text-[12px] text-[#0f62fe] font-semibold hover:underline"
+                >
+                  Open pending boards in Quality Log →
+                </button>
+              </div>
+
+              <div className="border border-[#e0e0e0] bg-[#ffffff] p-5">
+                <span className="text-[13px] font-semibold text-[#525252] block">
+                  Board Pass / Release Rate
+                </span>
+                <p className="text-[36px] font-light text-[#24a148] mt-1">
+                  {passRatePct !== null ? `${passRatePct}%` : "—"}
+                </p>
                 <span className="text-[12px] text-[#525252]">
-                  Awaiting operator disposition sign-off
+                  {stats?.disposition_counts?.pass ?? 0} boards passed ·{" "}
+                  {stats?.disposition_counts?.rework ?? 0} sent to rework
                 </span>
               </div>
 
               <div className="border border-[#e0e0e0] bg-[#ffffff] p-5">
-                <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                  AI suggestion precision
+                <span className="text-[13px] font-semibold text-[#525252] block">
+                  AI Suggestion Accuracy
                 </span>
                 <p className="text-[36px] font-light text-[#0f62fe] mt-1">
                   {stats?.kpis.ai_precision_pct !== null &&
@@ -2320,13 +2743,13 @@ export default function AOILiteBatamApp() {
                     : "—"}
                 </p>
                 <span className="text-[12px] text-[#525252]">
-                  Accepted AI flags / total reviewed AI flags
+                  Share of AI findings confirmed by human inspectors
                 </span>
               </div>
 
               <div className="border border-[#e0e0e0] bg-[#ffffff] p-5">
-                <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                  AI false-call rate
+                <span className="text-[13px] font-semibold text-[#525252] block">
+                  False Alarm Rate
                 </span>
                 <p className="text-[36px] font-light text-[#161616] mt-1">
                   {stats?.kpis.false_call_rate_pct !== null &&
@@ -2335,86 +2758,57 @@ export default function AOILiteBatamApp() {
                     : "—"}
                 </p>
                 <span className="text-[12px] text-[#525252]">
-                  Rejected AI flags ({stats?.kpis.ai_flags_rejected ?? 0} false positives)
+                  AI flags dismissed as false alarms ({stats?.kpis.ai_flags_rejected ?? 0} dismissed)
                 </span>
               </div>
 
               <div className="border border-[#e0e0e0] bg-[#ffffff] p-5">
-                <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                  AI recall proxy (sample set)
-                </span>
-                <p className="text-[36px] font-light text-[#24a148] mt-1">
-                  {stats?.kpis.ai_recall_proxy_pct !== null &&
-                  stats?.kpis.ai_recall_proxy_pct !== undefined
-                    ? `${stats.kpis.ai_recall_proxy_pct}%`
-                    : "—"}
-                </p>
-                <span className="text-[12px] text-[#525252]">
-                  Human added missed defects: {stats?.kpis.human_added_defects ?? 0}
-                </span>
-              </div>
-
-              <div className="border border-[#e0e0e0] bg-[#ffffff] p-5">
-                <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                  Traceability completeness
-                </span>
-                <p className="text-[36px] font-light text-[#24a148] mt-1">
-                  {stats?.kpis.traceability_completeness_pct ?? 100}%
-                </p>
-                <span className="text-[12px] text-[#525252]">
-                  Records with hash, model, prompt, operator &amp; disposition
-                </span>
-              </div>
-
-              <div className="border border-[#e0e0e0] bg-[#ffffff] p-5">
-                <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                  Avg documentation time
+                <span className="text-[13px] font-semibold text-[#525252] block">
+                  Average Inspection &amp; Sign-Off Time
                 </span>
                 <p className="text-[36px] font-light text-[#161616] mt-1">
                   {stats?.kpis.avg_doc_time_s ? `${stats.kpis.avg_doc_time_s}s` : "—"}
                 </p>
                 <span className="text-[12px] text-[#525252]">
-                  Capture to human disposition sign-off
-                </span>
-              </div>
-
-              <div className="border border-[#e0e0e0] bg-[#ffffff] p-5">
-                <span className="text-[12px] tracking-[0.32px] text-[#525252] block">
-                  Avg Gemma 4 latency
-                </span>
-                <p className="text-[36px] font-light text-[#0f62fe] mt-1">
-                  {stats?.kpis.avg_ai_latency_ms ? `${stats.kpis.avg_ai_latency_ms}ms` : "—"}
-                </p>
-                <span className="text-[12px] text-[#525252]">
-                  Multimodal inference round-trip
+                  From selecting a board photo to final inspector sign-off
                 </span>
               </div>
             </div>
 
-            {/* Pareto & Breakdown Charts */}
+            {/* Natural-Language Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Defect Pareto Chart */}
+              {/* Most Common Defect Types (Pareto) */}
               <div className="border border-[#e0e0e0] bg-[#ffffff] p-6 space-y-4">
                 <div>
-                  <span className="text-[12px] text-[#525252] block">
-                    DMAIC Analyze · Confirmed defect taxonomy Pareto
+                  <span className="text-[12px] text-[#0f62fe] font-semibold block">
+                    Issue Breakdown
                   </span>
                   <h2 className="text-[20px] font-normal text-[#161616]">
-                    Defect distribution across 6 MVP classes
+                    Most Common Confirmed Defect Types
                   </h2>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-3.5">
                   {(stats?.pareto_defects || []).map((item) => {
                     const maxCount = Math.max(
                       1,
                       ...(stats?.pareto_defects.map((d) => d.count) || [1])
                     );
+                    const totalDefects = Math.max(
+                      1,
+                      (stats?.pareto_defects || []).reduce((acc, d) => acc + d.count, 0)
+                    );
                     const widthPct = Math.round((item.count / maxCount) * 100);
+                    const sharePct = Math.round((item.count / totalDefects) * 100);
                     return (
                       <div key={item.defect_class} className="space-y-1">
                         <div className="flex justify-between text-[13px]">
-                          <span className="font-mono text-[#161616]">{item.defect_class}</span>
-                          <strong className="font-mono text-[#161616]">{item.count}</strong>
+                          <span className="font-semibold text-[#161616]">
+                            {formatDefectClass(item.defect_class)}
+                          </span>
+                          <span className="text-[#525252]">
+                            <strong className="text-[#161616]">{item.count}</strong> (
+                            {sharePct}%)
+                          </span>
                         </div>
                         <div className="w-full h-3 bg-[#f4f4f4] border border-[#e0e0e0]">
                           <div
@@ -2428,113 +2822,177 @@ export default function AOILiteBatamApp() {
                 </div>
               </div>
 
-              {/* Disposition & Agreement Breakdown */}
+              {/* Final Board Decisions & Inspector Agreement */}
               <div className="border border-[#e0e0e0] bg-[#ffffff] p-6 space-y-6">
                 <div>
-                  <span className="text-[12px] text-[#525252] block">
-                    DMAIC Control · Human verification &amp; disposition mix
+                  <span className="text-[12px] text-[#0f62fe] font-semibold block">
+                    Inspection Outcomes
                   </span>
                   <h2 className="text-[20px] font-normal text-[#161616]">
-                    Confirmed dispositions &amp; operator agreement
+                    Final Board Decisions &amp; Inspector Agreement
                   </h2>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {(["pass", "rework", "quarantine", "escalate"] as const).map((d) => (
-                    <div key={d} className="p-3 bg-[#f4f4f4] border border-[#e0e0e0]">
-                      <span className="text-[11px] font-mono uppercase text-[#525252] block">
-                        {d}
+                    <div key={d} className="p-3.5 bg-[#f4f4f4] border border-[#e0e0e0]">
+                      <span className="text-[12px] font-semibold text-[#525252] block">
+                        {DISPOSITION_INFO[d].shortLabel}
                       </span>
-                      <strong className="text-[24px] font-light text-[#161616]">
+                      <strong className="text-[26px] font-light text-[#161616]">
                         {stats?.disposition_counts?.[d] ?? 0}
                       </strong>
                     </div>
                   ))}
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 pt-2 border-t border-[#e0e0e0]">
-                  {(["agree", "partial", "disagree"] as const).map((ag) => (
-                    <div key={ag} className="p-3 bg-[#f4f4f4] border border-[#e0e0e0]">
-                      <span className="text-[11px] font-mono uppercase text-[#525252] block">
-                        Human {ag}
-                      </span>
-                      <strong className="text-[22px] font-light text-[#161616]">
-                        {stats?.agreement_counts?.[ag] ?? 0}
-                      </strong>
-                    </div>
-                  ))}
+                <div className="space-y-2 pt-2 border-t border-[#e0e0e0]">
+                  <span className="text-[12px] font-semibold text-[#525252] block">
+                    How often inspectors agreed with the initial AI suggestion:
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {[
+                      { key: "agree", label: "Confirmed AI Finding" },
+                      { key: "partial", label: "Adjusted by Operator" },
+                      { key: "disagree", label: "Overridden by Operator" },
+                    ].map((ag) => (
+                      <div key={ag.key} className="p-3 bg-[#f4f4f4] border border-[#e0e0e0]">
+                        <span className="text-[12px] text-[#525252] block">{ag.label}</span>
+                        <strong className="text-[22px] font-light text-[#161616]">
+                          {stats?.agreement_counts?.[ag.key] ?? 0}
+                        </strong>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* DMAIC Methodology Alignment Card */}
-            <div className="border border-[#e0e0e0] bg-[#f4f4f4] p-6 space-y-3">
-              <h3 className="text-[18px] font-semibold text-[#161616]">
-                Lean Six Sigma (DMAIC) alignment &amp; scope boundary
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-[13px]">
-                <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
-                  <strong className="text-[#0f62fe] block mb-1">Define</strong>
-                  Manual paper/chat PCB defect logs in Tier-2/3 lines and SMK labs lack standardized taxonomy and traceability.
+            {/* Collapsible Lean Six Sigma (DMAIC) & System Telemetry Section */}
+            <div className="border border-[#e0e0e0] bg-[#f4f4f4] p-5">
+              <button
+                type="button"
+                onClick={() => setShowDmaicDetails((v) => !v)}
+                className="w-full flex items-center justify-between text-left"
+              >
+                <div>
+                  <span className="text-[12px] text-[#0f62fe] font-semibold block">
+                    Quality Engineering Methodology &amp; System Telemetry
+                  </span>
+                  <h3 className="text-[16px] font-semibold text-[#161616]">
+                    Lean Six Sigma (DMAIC) Alignment &amp; AI Performance Metrics
+                  </h3>
                 </div>
-                <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
-                  <strong className="text-[#0f62fe] block mb-1">Measure</strong>
-                  Captures documentation time (s), AI precision, false-call rate, and 100% audit field completeness.
+                {showDmaicDetails ? (
+                  <ChevronDown className="w-5 h-5 text-[#161616]" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-[#161616]" />
+                )}
+              </button>
+
+              {showDmaicDetails && (
+                <div className="mt-4 pt-4 border-t border-[#e0e0e0] space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[13px]">
+                    <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
+                      <span className="text-[12px] text-[#525252] block">
+                        AI Detection Coverage (Recall Proxy)
+                      </span>
+                      <strong className="text-[20px] font-light text-[#161616]">
+                        {stats?.kpis.ai_recall_proxy_pct !== null &&
+                        stats?.kpis.ai_recall_proxy_pct !== undefined
+                          ? `${stats.kpis.ai_recall_proxy_pct}%`
+                          : "—"}
+                      </strong>
+                      <span className="text-[11px] text-[#525252] block">
+                        Issues added manually by inspector: {stats?.kpis.human_added_defects ?? 0}
+                      </span>
+                    </div>
+                    <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
+                      <span className="text-[12px] text-[#525252] block">
+                        Audit Record Completeness
+                      </span>
+                      <strong className="text-[20px] font-light text-[#24a148]">
+                        {stats?.kpis.traceability_completeness_pct ?? 100}%
+                      </strong>
+                      <span className="text-[11px] text-[#525252] block">
+                        Includes board ID, operator, timestamp, and sign-off
+                      </span>
+                    </div>
+                    <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
+                      <span className="text-[12px] text-[#525252] block">
+                        Average Live AI Scan Speed
+                      </span>
+                      <strong className="text-[20px] font-light text-[#0f62fe]">
+                        {stats?.kpis.avg_ai_latency_ms
+                          ? `${(stats.kpis.avg_ai_latency_ms / 1000).toFixed(1)}s`
+                          : "—"}
+                      </strong>
+                      <span className="text-[11px] text-[#525252] block">
+                        Model: {config?.model_id || "gemma-4-26b-a4b-it"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-[13px]">
+                    <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
+                      <strong className="text-[#0f62fe] block mb-1">Define</strong>
+                      Replaces slow paper and chat PCB defect logs in Batam Tier-2/3 lines and SMK labs with a structured digital record.
+                    </div>
+                    <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
+                      <strong className="text-[#0f62fe] block mb-1">Measure</strong>
+                      Tracks review time, AI suggestion accuracy, false-alarm rate, and 100% record completeness.
+                    </div>
+                    <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
+                      <strong className="text-[#0f62fe] block mb-1">Analyze</strong>
+                      Groups confirmed defects by issue type, priority, production line, operator, and shift.
+                    </div>
+                    <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
+                      <strong className="text-[#0f62fe] block mb-1">Improve</strong>
+                      Uses multimodal Gemma 4 to spot visible issues across 6 standard categories while keeping the human in control.
+                    </div>
+                    <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
+                      <strong className="text-[#0f62fe] block mb-1">Control</strong>
+                      Requires human sign-off on every board, tracks false alarms, and exports audit-ready spreadsheets.
+                    </div>
+                  </div>
                 </div>
-                <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
-                  <strong className="text-[#0f62fe] block mb-1">Analyze</strong>
-                  Stratifies confirmed defects by class Pareto, severity, board ID, line/station, operator, and shift.
-                </div>
-                <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
-                  <strong className="text-[#0f62fe] block mb-1">Improve</strong>
-                  Gemma 4 multimodal inference standardizes the 6-class taxonomy and accelerates structured defect logging.
-                </div>
-                <div className="p-3 bg-[#ffffff] border border-[#e0e0e0]">
-                  <strong className="text-[#0f62fe] block mb-1">Control</strong>
-                  Enforces mandatory human disposition sign-off, SHA-256 image hashing, versioned prompts, and rejected-flag feedback.
-                </div>
-              </div>
+              )}
             </div>
           </div>
         )}
       </main>
 
-      {/* Carbon Inverted Footer (#161616 inverse-canvas, the only dark surface per docs/DESIGN.md) */}
-      <footer className="bg-[#161616] text-[#c6c6c6] px-4 lg:px-8 py-12 mt-12 border-t border-[#262626]">
+      {/* Carbon Inverted Footer */}
+      <footer className="bg-[#161616] text-[#c6c6c6] px-4 lg:px-8 py-10 mt-12 border-t border-[#262626]">
         <div className="max-w-[1584px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-[14px] leading-[1.29] tracking-[0.16px]">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-[#ffffff] font-semibold">
               <span className="inline-block w-3 h-3 bg-[#0f62fe]" />
-              <span>AOI-Lite Batam</span>
+              <span>AOI-Lite Batam: AI-Assisted SMT Inspection</span>
             </div>
             <p className="text-[12px] text-[#c6c6c6] leading-[1.5]">
-              Open-source human-in-the-loop SMT/PCBA visual inspection &amp; quality-record system powered by multimodal Google Gemma 4.
+              Open-source, human-in-the-loop SMT/PCBA visual inspection &amp; quality-record assistant powered by Google Gemma 4.
             </p>
           </div>
 
           <div className="space-y-1.5 text-[12px]">
-            <p className="text-[#ffffff] font-semibold mb-2">Architecture &amp; Stack</p>
-            <p>Next.js App Router (Unified SPA + API)</p>
-            <p>Google Gemma 4 ({config?.model_id || "gemma-4-26b-a4b-it"})</p>
-            <p>Supabase PostgreSQL (`public.aoi_inspections`)</p>
-            <p>IBM Carbon Design System (`docs/DESIGN.md`)</p>
+            <p className="text-[#ffffff] font-semibold mb-2">6 Visual Inspection Checks</p>
+            <p>Missing Component · Solder Bridge / Short</p>
+            <p>Wrong Polarity · Tombstoning (Lifted Chip)</p>
+            <p>Misaligned Component · Copper / Trace Anomaly</p>
           </div>
 
           <div className="space-y-1.5 text-[12px]">
-            <p className="text-[#ffffff] font-semibold mb-2">Quality &amp; Safety Boundaries</p>
-            <p>Strictly 6 visible SMT/PCB defect classes</p>
-            <p>Mandatory human confirmation on all records</p>
-            <p>Hidden BGA/QFN solder joints require X-ray</p>
+            <p className="text-[#ffffff] font-semibold mb-2">Quality &amp; Safety Rules</p>
+            <p>Mandatory human sign-off on every board</p>
+            <p>Hidden BGA/QFN joints require X-ray check</p>
             <p>Zero autonomous pass/fail release decisions</p>
           </div>
 
           <div className="space-y-1.5 text-[12px]">
             <p className="text-[#ffffff] font-semibold mb-2">Hacktoberfest Hack Day Batam</p>
             <p>Kota Batam × Batam Innovation Center</p>
-            <p>License: MIT Open Source</p>
-            <p className="font-mono text-[11px] text-[#8c8c8c]">
-              Prompt: {config?.prompt_version || "aoi-prompt-v1.0"} ({config?.prompt_sha256 || "sha256"})
-            </p>
+            <p>Open-Source MIT License · Powered by Gemma 4</p>
           </div>
         </div>
       </footer>

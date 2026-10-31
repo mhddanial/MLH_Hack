@@ -1,4 +1,4 @@
-# AOI-Lite Batam
+# AOI-Lite Batam: AI-Assisted SMT Inspection
 
 **Human-in-the-Loop, Multimodal Gemma 4 Inspection Assistant & Quality-Record System for SMT/PCBA Manufacturing and SMK Laboratories**
 

@@ -1,4 +1,4 @@
-# Lean Six Sigma (DMAIC) Quality Alignment — AOI-Lite Batam
+# Lean Six Sigma (DMAIC) Quality Alignment — AOI-Lite Batam: AI-Assisted SMT Inspection
 
 > **Scope Disclaimer:** AOI-Lite Batam demonstrates how structured, human-verified multimodal AI records enable DMAIC quality engineering in small Batam PCBA suppliers and SMK electronics laboratories. It does **not** claim to be a completed factory-wide Six Sigma capability study.
 

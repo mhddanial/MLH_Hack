@@ -1,4 +1,4 @@
-# AOI-Lite Batam: Sprint Plan (31 Oct 2026, 11:00 to 15:00 WIB)
+# AOI-Lite Batam: AI-Assisted SMT Inspection — Sprint Plan (31 Oct 2026, 11:00 to 15:00 WIB)
 
 > Context: [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) · Done criteria: [DEFINITION_OF_DONE.md](DEFINITION_OF_DONE.md) · Live tracker: [PROGRESS.md](PROGRESS.md)
 >

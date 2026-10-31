@@ -1,4 +1,4 @@
-# Data Sources, Attribution, and Taxonomy Mapping
+# Data Sources, Attribution, and Taxonomy Mapping — AOI-Lite Batam: AI-Assisted SMT Inspection
 
 > **Privacy & IP Compliance Statement:**
 > AOI-Lite Batam uses **only** publicly available open-source academic/Kaggle research datasets and synthetic/procedural test cards. **Zero** confidential customer PCBs, proprietary designs, unreleased product layouts, or real production/operator personal data (PII) are stored or transmitted.

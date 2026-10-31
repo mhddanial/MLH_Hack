@@ -17,9 +17,9 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AOI-Lite Batam | Human-in-the-Loop Gemma 4 SMT Inspection Assistant",
+  title: "AOI-Lite Batam: AI-Assisted SMT Inspection",
   description:
-    "AI-assisted Surface-Mount Technology (SMT) PCB inspection and quality-record system powered by multimodal Gemma 4 for Batam electronics manufacturers and SMK labs.",
+    "Human-in-the-loop AI-assisted Surface-Mount Technology (SMT) PCB inspection and quality-record system powered by multimodal Gemma 4 for Batam electronics manufacturers and SMK labs.",
 };
 
 export default function RootLayout({

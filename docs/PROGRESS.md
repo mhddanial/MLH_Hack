@@ -1,4 +1,4 @@
-# AOI-Lite Batam: Progress Tracker
+# AOI-Lite Batam: AI-Assisted SMT Inspection — Progress Tracker
 
 > Update this file at the end of every sprint (and whenever a blocker appears).
 > Plan: [SPRINT_PLAN.md](SPRINT_PLAN.md) · Done criteria: [DEFINITION_OF_DONE.md](DEFINITION_OF_DONE.md) · Context: [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) · Style: [DESIGN.md](DESIGN.md)

@@ -1,4 +1,4 @@
-# AOI-Lite Batam: Definition of Done
+# AOI-Lite Batam: AI-Assisted SMT Inspection — Definition of Done
 
 > The project is **done** when every 🔴 item in Section 1 is checked and verified in the running app (not just written in code).
 > Verification = actually performed and observed by a team member. Record the evidence in [PROGRESS.md](PROGRESS.md).

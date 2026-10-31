@@ -1,4 +1,4 @@
-# Demo & Video Script — AOI-Lite Batam
+# Demo & Video Script — AOI-Lite Batam: AI-Assisted SMT Inspection
 
 > **Event:** Hacktoberfest Hack Day Kota Batam x Batam Innovation Center
 > **Categories:** Best Open-Source AI Project · Best Use of Gemma 4

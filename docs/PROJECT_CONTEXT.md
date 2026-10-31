@@ -1,4 +1,4 @@
-# AOI-Lite Batam: Project Context (Single Source of Truth)
+# AOI-Lite Batam: AI-Assisted SMT Inspection — Project Context (Single Source of Truth)
 
 > Sources: `AOI-Lite_Batam_Hackathon_Project_Brief.docx` (30 Oct 2026), the engineering kickoff request, and `docs/CONTEXT.md` (hackathon rules and judging).
 > If a document conflicts with this one, **the Project Brief wins**, then this file.

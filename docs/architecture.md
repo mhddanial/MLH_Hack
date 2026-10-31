@@ -1,4 +1,4 @@
-# System Architecture — AOI-Lite Batam
+# System Architecture — AOI-Lite Batam: AI-Assisted SMT Inspection
 
 > **Core Stack (Unified Next.js Full-Stack SPA on Vercel):**
 > - **Frontend & Backend:** **Next.js** (App Router, React, TypeScript, Tailwind CSS) — Single-Page Application (SPA) UI + Serverless API Route Handlers (`src/app/api/*`)
