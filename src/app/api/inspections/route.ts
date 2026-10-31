@@ -14,6 +14,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     records: filtered,
+    inspections: filtered,
     storage_backend,
   });
 }

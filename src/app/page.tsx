@@ -517,7 +517,7 @@ export default function AOILiteBatamApp() {
       }
       if (recRes.ok) {
         const recData = await recRes.json();
-        setRecords(recData.inspections || []);
+        setRecords(recData.records || recData.inspections || []);
         if (recData.storage_backend) setStorageBackend(recData.storage_backend);
       }
       if (stRes.ok) {

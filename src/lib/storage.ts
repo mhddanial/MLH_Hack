@@ -169,7 +169,7 @@ export async function listInspectionRecords(limit = 100): Promise<{
       .select("*")
       .order("created_at", { ascending: false })
       .limit(limit);
-    if (!error && Array.isArray(data)) {
+    if (!error && Array.isArray(data) && data.length > 0) {
       return {
         records: data as InspectionRecord[],
         storage_backend: "supabase",
