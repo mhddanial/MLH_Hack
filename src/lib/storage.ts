@@ -67,6 +67,7 @@ export function getSupabase(): SupabaseClient | null {
 }
 
 const LOCAL_STORE_PATH = path.join(process.cwd(), "data", "local_records.json");
+const SEED_STORE_PATH = path.join(process.cwd(), "sample_data", "seed_records.json");
 let memoryStore: Map<string, InspectionRecord> = new Map();
 let localLoaded = false;
 
@@ -74,8 +75,13 @@ function loadLocalStore(): Map<string, InspectionRecord> {
   if (localLoaded) return memoryStore;
   localLoaded = true;
   try {
-    if (fs.existsSync(LOCAL_STORE_PATH)) {
-      const raw = JSON.parse(fs.readFileSync(LOCAL_STORE_PATH, "utf-8")) as InspectionRecord[];
+    const targetPath = fs.existsSync(LOCAL_STORE_PATH)
+      ? LOCAL_STORE_PATH
+      : fs.existsSync(SEED_STORE_PATH)
+      ? SEED_STORE_PATH
+      : null;
+    if (targetPath) {
+      const raw = JSON.parse(fs.readFileSync(targetPath, "utf-8")) as InspectionRecord[];
       for (const item of raw) {
         memoryStore.set(item.id, item);
       }

@@ -1,0 +1,882 @@
+[
+  {
+    "id": "INS-20261031-DEMO-12",
+    "created_at": "2026-10-31T06:49:36.686Z",
+    "shift": "Shift A (07:00-15:00)",
+    "board_id": "BAT-PCBA-109",
+    "board_revision": "A",
+    "line_station": "Line-1-PostReflow",
+    "operator_id": "OP-BTM-01 (Siti - Line 1)",
+    "inspection_type": "post_reflow",
+    "image_filename": "/samples/pku_spurious_copper_01.jpg",
+    "image_sha256": "343ed0e7ba9e9e9ba80b4a02c25e9427d228dd209e412f234848fa320fcd39fd",
+    "sample_id": "pku_spurious_copper_01",
+    "reference_label": "uncertain_or_other",
+    "precheck": {
+      "width": 1400,
+      "height": 731,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-PCBA-109\",\"inspection_id\":\"INS-20261031-DEMO-12\",\"image_quality\":\"acceptable\",\"defects\":[{\"defect_class\":\"uncertain_or_other\",\"location_hint\":\"lower-center region, lower-left quadrant, lower-right quadrant\",\"confidence\":0.56,\"severity\":\"low\",\"evidence\":\"Visible spurious copper anomaly detected in lower-center region, lower-left quadrant, lower-right quadrant matching uncertain_or_other taxonomy criteria.\",\"recommended_action\":\"Inspect copper trace anomaly under 10x microscope; escalate to QA if copper trace width is below IPC-A-600 minimum.\"}],\"overall_disposition\":\"requires_human_verification\",\"visible_labels\":[],\"notes\":\"Kaggle/PKU bare-PCB sample with 3 annotated spurious copper anomaly(s) in lower-center region, lower-left quadrant, lower-right quadrant. Hidden BGA/QFN joints not assessed (requires X-ray).\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-PCBA-109",
+      "inspection_id": "INS-20261031-DEMO-12",
+      "image_quality": "acceptable",
+      "defects": [
+        {
+          "defect_class": "uncertain_or_other",
+          "location_hint": "lower-center region, lower-left quadrant, lower-right quadrant",
+          "confidence": 0.56,
+          "severity": "low",
+          "evidence": "Visible spurious copper anomaly detected in lower-center region, lower-left quadrant, lower-right quadrant matching uncertain_or_other taxonomy criteria.",
+          "recommended_action": "Inspect copper trace anomaly under 10x microscope; escalate to QA if copper trace width is below IPC-A-600 minimum."
+        }
+      ],
+      "overall_disposition": "requires_human_verification",
+      "visible_labels": [],
+      "notes": "Kaggle/PKU bare-PCB sample with 3 annotated spurious copper anomaly(s) in lower-center region, lower-left quadrant, lower-right quadrant. Hidden BGA/QFN joints not assessed (requires X-ray).",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 28486,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Low-confidence or ambiguous surface anomaly (<0.60 threshold); routed to mandatory human verification"
+    ],
+    "original_ai_disposition": "requires_human_verification",
+    "status": "pending_review",
+    "final_defects": null,
+    "defect_reviews": null,
+    "final_disposition": null,
+    "reviewer_id": null,
+    "reviewed_at": null,
+    "human_agreement": null,
+    "review_notes": null,
+    "doc_time_s": null,
+    "started_at": "2026-10-31T06:49:36.686Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-11",
+    "created_at": "2026-10-31T06:46:36.274Z",
+    "shift": "Shift B (15:00-23:00)",
+    "board_id": "BAT-PCBA-108",
+    "board_revision": "A",
+    "line_station": "SMK-Lab-Bench-A",
+    "operator_id": "OP-SMK-01 (Rizky - SMK Lab)",
+    "inspection_type": "smk_lab_training",
+    "image_filename": "/samples/pku_spur_01.jpg",
+    "image_sha256": "c62c97822b2e9860bd82337360dc2548c00620d9746389635e64dfdaf1748bae",
+    "sample_id": "pku_spur_01",
+    "reference_label": "uncertain_or_other",
+    "precheck": {
+      "width": 1400,
+      "height": 731,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-PCBA-108\",\"inspection_id\":\"INS-20261031-DEMO-11\",\"image_quality\":\"acceptable\",\"defects\":[{\"defect_class\":\"uncertain_or_other\",\"location_hint\":\"lower-center region, lower-left quadrant\",\"confidence\":0.56,\"severity\":\"medium\",\"evidence\":\"Visible spur anomaly detected in lower-center region, lower-left quadrant matching uncertain_or_other taxonomy criteria.\",\"recommended_action\":\"Inspect copper trace anomaly under 10x microscope; escalate to QA if copper trace width is below IPC-A-600 minimum.\"}],\"overall_disposition\":\"requires_human_verification\",\"visible_labels\":[],\"notes\":\"Kaggle/PKU bare-PCB sample with 3 annotated spur anomaly(s) in lower-center region, lower-left quadrant. Hidden BGA/QFN joints not assessed (requires X-ray).\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-PCBA-108",
+      "inspection_id": "INS-20261031-DEMO-11",
+      "image_quality": "acceptable",
+      "defects": [
+        {
+          "defect_class": "uncertain_or_other",
+          "location_hint": "lower-center region, lower-left quadrant",
+          "confidence": 0.56,
+          "severity": "medium",
+          "evidence": "Visible spur anomaly detected in lower-center region, lower-left quadrant matching uncertain_or_other taxonomy criteria.",
+          "recommended_action": "Inspect copper trace anomaly under 10x microscope; escalate to QA if copper trace width is below IPC-A-600 minimum."
+        }
+      ],
+      "overall_disposition": "requires_human_verification",
+      "visible_labels": [],
+      "notes": "Kaggle/PKU bare-PCB sample with 3 annotated spur anomaly(s) in lower-center region, lower-left quadrant. Hidden BGA/QFN joints not assessed (requires X-ray).",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 28632,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Low-confidence or ambiguous surface anomaly (<0.60 threshold); routed to mandatory human verification"
+    ],
+    "original_ai_disposition": "requires_human_verification",
+    "status": "pending_review",
+    "final_defects": null,
+    "defect_reviews": null,
+    "final_disposition": null,
+    "reviewer_id": null,
+    "reviewed_at": null,
+    "human_agreement": null,
+    "review_notes": null,
+    "doc_time_s": null,
+    "started_at": "2026-10-31T06:46:36.274Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-10",
+    "created_at": "2026-10-31T06:43:35.328Z",
+    "shift": "Shift A (07:00-15:00)",
+    "board_id": "BAT-PCBA-GOLD-04",
+    "board_revision": "A",
+    "line_station": "Line-2-FirstArticle",
+    "operator_id": "OP-BTM-02 (Budi - Line 2)",
+    "inspection_type": "first_article",
+    "image_filename": "/samples/golden_clean_02.jpg",
+    "image_sha256": "79213c6c512618884e10efb9b901b5bc5c8a0c365d8e9fdeebd8d0e1e2076adf",
+    "sample_id": "golden_clean_02",
+    "reference_label": "none",
+    "precheck": {
+      "width": 1400,
+      "height": 1128,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-PCBA-GOLD-04\",\"inspection_id\":\"INS-20261031-DEMO-10\",\"image_quality\":\"acceptable\",\"defects\":[],\"overall_disposition\":\"pass\",\"visible_labels\":[],\"notes\":\"Clean reference PCB with intact copper traces and zero visible surface anomalies. Hidden BGA/QFN joints require X-ray.\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-PCBA-GOLD-04",
+      "inspection_id": "INS-20261031-DEMO-10",
+      "image_quality": "acceptable",
+      "defects": [],
+      "overall_disposition": "pass",
+      "visible_labels": [],
+      "notes": "Clean reference PCB with intact copper traces and zero visible surface anomalies. Hidden BGA/QFN joints require X-ray.",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 31355,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Operator confirmation required"
+    ],
+    "original_ai_disposition": "pass",
+    "status": "confirmed",
+    "final_defects": [],
+    "defect_reviews": [],
+    "final_disposition": "pass",
+    "reviewer_id": "OP-BTM-02 (Budi - Line 2)",
+    "reviewed_at": "2026-10-31T06:43:50.328Z",
+    "human_agreement": "agree",
+    "review_notes": "Golden reference board 04 verified clean; released.",
+    "doc_time_s": 15,
+    "started_at": "2026-10-31T06:43:35.328Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-09",
+    "created_at": "2026-10-31T06:40:34.658Z",
+    "shift": "Shift A (07:00-15:00)",
+    "board_id": "BAT-PCBA-GOLD-01",
+    "board_revision": "A",
+    "line_station": "Line-1-PostReflow",
+    "operator_id": "OP-BTM-01 (Siti - Line 1)",
+    "inspection_type": "first_article",
+    "image_filename": "/samples/golden_clean_01.jpg",
+    "image_sha256": "265da329419c90dcff112e463f26d71f099c4fb062767ced242fa525bee472fb",
+    "sample_id": "golden_clean_01",
+    "reference_label": "none",
+    "precheck": {
+      "width": 1400,
+      "height": 731,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-PCBA-GOLD-01\",\"inspection_id\":\"INS-20261031-DEMO-09\",\"image_quality\":\"acceptable\",\"defects\":[],\"overall_disposition\":\"pass\",\"visible_labels\":[],\"notes\":\"The board is an unpopulated bare PCB. No component-related defects (missing_component, polarity_error, tombstoning, component_shift) can be assessed. Copper traces and solder pads appear intact with no visible solder bridges or trace anomalies.\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-PCBA-GOLD-01",
+      "inspection_id": "INS-20261031-DEMO-09",
+      "image_quality": "acceptable",
+      "defects": [],
+      "overall_disposition": "pass",
+      "visible_labels": [],
+      "notes": "The board is an unpopulated bare PCB. No component-related defects (missing_component, polarity_error, tombstoning, component_shift) can be assessed. Copper traces and solder pads appear intact with no visible solder bridges or trace anomalies.",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 22865,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Operator confirmation required"
+    ],
+    "original_ai_disposition": "pass",
+    "status": "confirmed",
+    "final_defects": [],
+    "defect_reviews": [],
+    "final_disposition": "pass",
+    "reviewer_id": "OP-BTM-01 (Siti - Line 1)",
+    "reviewed_at": "2026-10-31T06:40:48.658Z",
+    "human_agreement": "agree",
+    "review_notes": "Golden reference board verified clean; zero defects.",
+    "doc_time_s": 14,
+    "started_at": "2026-10-31T06:40:34.658Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-08",
+    "created_at": "2026-10-31T06:37:33.752Z",
+    "shift": "Shift B (15:00-23:00)",
+    "board_id": "BAT-PCBA-107",
+    "board_revision": "A",
+    "line_station": "Line-1-PostReflow",
+    "operator_id": "QA-LEAD-01 (Dewi - Senior QA)",
+    "inspection_type": "post_reflow",
+    "image_filename": "/samples/pku_mouse_bite_01.jpg",
+    "image_sha256": "ac47dc0ac6957be5df0a27ae9a6d7e88b80d2a180d5a5abbb89b7686896f04cd",
+    "sample_id": "pku_mouse_bite_01",
+    "reference_label": "uncertain_or_other",
+    "precheck": {
+      "width": 1400,
+      "height": 731,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-PCBA-107\",\"inspection_id\":\"INS-20261031-DEMO-08\",\"image_quality\":\"acceptable\",\"defects\":[{\"defect_class\":\"uncertain_or_other\",\"location_hint\":\"center-right region, lower-center region, lower-right quadrant\",\"confidence\":0.56,\"severity\":\"medium\",\"evidence\":\"Visible mouse bite anomaly detected in center-right region, lower-center region, lower-right quadrant matching uncertain_or_other taxonomy criteria.\",\"recommended_action\":\"Inspect copper trace anomaly under 10x microscope; escalate to QA if copper trace width is below IPC-A-600 minimum.\"}],\"overall_disposition\":\"requires_human_verification\",\"visible_labels\":[],\"notes\":\"Kaggle/PKU bare-PCB sample with 3 annotated mouse bite anomaly(s) in center-right region, lower-center region, lower-right quadrant. Hidden BGA/QFN joints not assessed (requires X-ray).\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-PCBA-107",
+      "inspection_id": "INS-20261031-DEMO-08",
+      "image_quality": "acceptable",
+      "defects": [
+        {
+          "defect_class": "uncertain_or_other",
+          "location_hint": "center-right region, lower-center region, lower-right quadrant",
+          "confidence": 0.56,
+          "severity": "medium",
+          "evidence": "Visible mouse bite anomaly detected in center-right region, lower-center region, lower-right quadrant matching uncertain_or_other taxonomy criteria.",
+          "recommended_action": "Inspect copper trace anomaly under 10x microscope; escalate to QA if copper trace width is below IPC-A-600 minimum."
+        }
+      ],
+      "overall_disposition": "requires_human_verification",
+      "visible_labels": [],
+      "notes": "Kaggle/PKU bare-PCB sample with 3 annotated mouse bite anomaly(s) in center-right region, lower-center region, lower-right quadrant. Hidden BGA/QFN joints not assessed (requires X-ray).",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 26627,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Low-confidence or ambiguous surface anomaly (<0.60 threshold); routed to mandatory human verification"
+    ],
+    "original_ai_disposition": "requires_human_verification",
+    "status": "confirmed",
+    "final_defects": [
+      {
+        "defect_class": "uncertain_or_other",
+        "severity": "medium",
+        "location_hint": "center-right region, lower-center region, lower-right quadrant",
+        "source": "ai_edited",
+        "note": "Inspector refined location hint on trace mouse-bite nick and quarantined board."
+      }
+    ],
+    "defect_reviews": [
+      {
+        "ai_index": 0,
+        "action": "edit",
+        "defect_class": "uncertain_or_other",
+        "severity": "medium",
+        "location_hint": "center-right region, lower-center region, lower-right quadrant",
+        "note": "Inspector refined location hint on trace mouse-bite nick and quarantined board."
+      }
+    ],
+    "final_disposition": "quarantine",
+    "reviewer_id": "QA-LEAD-01 (Dewi - Senior QA)",
+    "reviewed_at": "2026-10-31T06:38:01.752Z",
+    "human_agreement": "partial",
+    "review_notes": "Inspector refined location hint on trace mouse-bite nick and quarantined board.",
+    "doc_time_s": 28,
+    "started_at": "2026-10-31T06:37:33.752Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-07",
+    "created_at": "2026-10-31T06:34:33.331Z",
+    "shift": "Shift B (15:00-23:00)",
+    "board_id": "BAT-PCBA-102",
+    "board_revision": "A",
+    "line_station": "Rework-Cell-01",
+    "operator_id": "QA-LEAD-01 (Dewi - Senior QA)",
+    "inspection_type": "rework_verification",
+    "image_filename": "/samples/pku_open_01.jpg",
+    "image_sha256": "17c2c0b0bd93d0eaa57f3f2021c6a38dccd1335445e7d76812fa2690510ec1c6",
+    "sample_id": "pku_open_01",
+    "reference_label": "uncertain_or_other",
+    "precheck": {
+      "width": 1400,
+      "height": 731,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-PCBA-102\",\"inspection_id\":\"INS-20261031-DEMO-07\",\"image_quality\":\"acceptable\",\"defects\":[{\"defect_class\":\"uncertain_or_other\",\"location_hint\":\"lower-center region, lower-left quadrant, upper-center region\",\"confidence\":0.56,\"severity\":\"high\",\"evidence\":\"Visible open circuit anomaly detected in lower-center region, lower-left quadrant, upper-center region matching uncertain_or_other taxonomy criteria.\",\"recommended_action\":\"Inspect copper trace anomaly under 10x microscope; escalate to QA if copper trace width is below IPC-A-600 minimum.\"}],\"overall_disposition\":\"requires_human_verification\",\"visible_labels\":[],\"notes\":\"Kaggle/PKU bare-PCB sample with 3 annotated open circuit anomaly(s) in lower-center region, lower-left quadrant, upper-center region. Hidden BGA/QFN joints not assessed (requires X-ray).\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-PCBA-102",
+      "inspection_id": "INS-20261031-DEMO-07",
+      "image_quality": "acceptable",
+      "defects": [
+        {
+          "defect_class": "uncertain_or_other",
+          "location_hint": "lower-center region, lower-left quadrant, upper-center region",
+          "confidence": 0.56,
+          "severity": "high",
+          "evidence": "Visible open circuit anomaly detected in lower-center region, lower-left quadrant, upper-center region matching uncertain_or_other taxonomy criteria.",
+          "recommended_action": "Inspect copper trace anomaly under 10x microscope; escalate to QA if copper trace width is below IPC-A-600 minimum."
+        }
+      ],
+      "overall_disposition": "requires_human_verification",
+      "visible_labels": [],
+      "notes": "Kaggle/PKU bare-PCB sample with 3 annotated open circuit anomaly(s) in lower-center region, lower-left quadrant, upper-center region. Hidden BGA/QFN joints not assessed (requires X-ray).",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 30152,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Low-confidence or ambiguous surface anomaly (<0.60 threshold); routed to mandatory human verification"
+    ],
+    "original_ai_disposition": "requires_human_verification",
+    "status": "escalated",
+    "final_defects": [
+      {
+        "defect_class": "uncertain_or_other",
+        "severity": "high",
+        "location_hint": "lower-center region, lower-left quadrant, upper-center region",
+        "source": "ai_escalated",
+        "note": "Open trace anomaly verified under 10x magnification; escalated to Senior QA."
+      }
+    ],
+    "defect_reviews": [
+      {
+        "ai_index": 0,
+        "action": "escalate",
+        "defect_class": "uncertain_or_other",
+        "severity": "high",
+        "location_hint": "lower-center region, lower-left quadrant, upper-center region",
+        "note": "Open trace anomaly verified under 10x magnification; escalated to Senior QA."
+      }
+    ],
+    "final_disposition": "escalate",
+    "reviewer_id": "QA-LEAD-01 (Dewi - Senior QA)",
+    "reviewed_at": "2026-10-31T06:35:04.331Z",
+    "human_agreement": "agree",
+    "review_notes": "Open trace anomaly verified under 10x magnification; escalated to Senior QA.",
+    "doc_time_s": 31,
+    "started_at": "2026-10-31T06:34:33.331Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-06",
+    "created_at": "2026-10-31T06:31:32.357Z",
+    "shift": "Shift B (15:00-23:00)",
+    "board_id": "BAT-PCBA-104",
+    "board_revision": "A",
+    "line_station": "SMK-Lab-Bench-A",
+    "operator_id": "OP-SMK-01 (Rizky - SMK Lab)",
+    "inspection_type": "smk_lab_training",
+    "image_filename": "/samples/pku_short_02.jpg",
+    "image_sha256": "afd44eb4aff3b2dd87ee9565a9ea4d8a424b5cc8c5bed35630b9605978ec5844",
+    "sample_id": "pku_short_02",
+    "reference_label": "solder_bridge",
+    "precheck": {
+      "width": 1400,
+      "height": 1128,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-PCBA-104\",\"inspection_id\":\"INS-20261031-DEMO-06\",\"image_quality\":\"acceptable\",\"defects\":[{\"defect_class\":\"solder_bridge\",\"location_hint\":\"center-left region, lower-center region, upper-center region\",\"confidence\":0.91,\"severity\":\"high\",\"evidence\":\"Visible short anomaly detected in center-left region, lower-center region, upper-center region matching solder_bridge taxonomy criteria.\",\"recommended_action\":\"Verify solder bridge at center-left region, lower-center region, upper-center region and route to rework.\"}],\"overall_disposition\":\"rework\",\"visible_labels\":[],\"notes\":\"Kaggle/PKU bare-PCB sample with 3 annotated short anomaly(s) in center-left region, lower-center region, upper-center region. Hidden BGA/QFN joints not assessed (requires X-ray).\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-PCBA-104",
+      "inspection_id": "INS-20261031-DEMO-06",
+      "image_quality": "acceptable",
+      "defects": [
+        {
+          "defect_class": "solder_bridge",
+          "location_hint": "center-left region, lower-center region, upper-center region",
+          "confidence": 0.91,
+          "severity": "high",
+          "evidence": "Visible short anomaly detected in center-left region, lower-center region, upper-center region matching solder_bridge taxonomy criteria.",
+          "recommended_action": "Verify solder bridge at center-left region, lower-center region, upper-center region and route to rework."
+        }
+      ],
+      "overall_disposition": "rework",
+      "visible_labels": [],
+      "notes": "Kaggle/PKU bare-PCB sample with 3 annotated short anomaly(s) in center-left region, lower-center region, upper-center region. Hidden BGA/QFN joints not assessed (requires X-ray).",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 30318,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Operator confirmation required"
+    ],
+    "original_ai_disposition": "rework",
+    "status": "confirmed",
+    "final_defects": [
+      {
+        "defect_class": "solder_bridge",
+        "severity": "high",
+        "location_hint": "center-left region, lower-center region, upper-center region",
+        "source": "ai_accepted",
+        "note": "Confirmed solder/copper short across parallel traces."
+      }
+    ],
+    "defect_reviews": [
+      {
+        "ai_index": 0,
+        "action": "accept",
+        "defect_class": "solder_bridge",
+        "severity": "high",
+        "location_hint": "center-left region, lower-center region, upper-center region",
+        "note": "Confirmed solder/copper short across parallel traces."
+      }
+    ],
+    "final_disposition": "rework",
+    "reviewer_id": "OP-SMK-01 (Rizky - SMK Lab)",
+    "reviewed_at": "2026-10-31T06:31:54.357Z",
+    "human_agreement": "agree",
+    "review_notes": "Confirmed solder/copper short across parallel traces.",
+    "doc_time_s": 22,
+    "started_at": "2026-10-31T06:31:32.357Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-05",
+    "created_at": "2026-10-31T06:28:31.976Z",
+    "shift": "Shift B (15:00-23:00)",
+    "board_id": "BAT-PCBA-101",
+    "board_revision": "A",
+    "line_station": "SMK-Lab-Bench-A",
+    "operator_id": "OP-SMK-01 (Rizky - SMK Lab)",
+    "inspection_type": "smk_lab_training",
+    "image_filename": "/samples/pku_short_01.jpg",
+    "image_sha256": "3e91a2aaf692c87b63ab538a0165ac571cbbad8b5741614e37f171774de6d8a3",
+    "sample_id": "pku_short_01",
+    "reference_label": "solder_bridge",
+    "precheck": {
+      "width": 1400,
+      "height": 731,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-PCBA-101\",\"inspection_id\":\"INS-20261031-DEMO-05\",\"image_quality\":\"acceptable\",\"defects\":[{\"defect_class\":\"solder_bridge\",\"location_hint\":\"lower-left quadrant, lower-right quadrant\",\"confidence\":0.91,\"severity\":\"high\",\"evidence\":\"Visible short anomaly detected in lower-left quadrant, lower-right quadrant matching solder_bridge taxonomy criteria.\",\"recommended_action\":\"Verify solder bridge at lower-left quadrant, lower-right quadrant and route to rework.\"}],\"overall_disposition\":\"rework\",\"visible_labels\":[],\"notes\":\"Kaggle/PKU bare-PCB sample with 3 annotated short anomaly(s) in lower-left quadrant, lower-right quadrant. Hidden BGA/QFN joints not assessed (requires X-ray).\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-PCBA-101",
+      "inspection_id": "INS-20261031-DEMO-05",
+      "image_quality": "acceptable",
+      "defects": [
+        {
+          "defect_class": "solder_bridge",
+          "location_hint": "lower-left quadrant, lower-right quadrant",
+          "confidence": 0.91,
+          "severity": "high",
+          "evidence": "Visible short anomaly detected in lower-left quadrant, lower-right quadrant matching solder_bridge taxonomy criteria.",
+          "recommended_action": "Verify solder bridge at lower-left quadrant, lower-right quadrant and route to rework."
+        }
+      ],
+      "overall_disposition": "rework",
+      "visible_labels": [],
+      "notes": "Kaggle/PKU bare-PCB sample with 3 annotated short anomaly(s) in lower-left quadrant, lower-right quadrant. Hidden BGA/QFN joints not assessed (requires X-ray).",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 66664,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Operator confirmation required"
+    ],
+    "original_ai_disposition": "rework",
+    "status": "confirmed",
+    "final_defects": [
+      {
+        "defect_class": "solder_bridge",
+        "severity": "high",
+        "location_hint": "lower-left quadrant, lower-right quadrant",
+        "source": "ai_accepted",
+        "note": "Confirmed copper bridge short in lower-left and lower-right quadrants."
+      }
+    ],
+    "defect_reviews": [
+      {
+        "ai_index": 0,
+        "action": "accept",
+        "defect_class": "solder_bridge",
+        "severity": "high",
+        "location_hint": "lower-left quadrant, lower-right quadrant",
+        "note": "Confirmed copper bridge short in lower-left and lower-right quadrants."
+      }
+    ],
+    "final_disposition": "rework",
+    "reviewer_id": "OP-SMK-01 (Rizky - SMK Lab)",
+    "reviewed_at": "2026-10-31T06:28:57.976Z",
+    "human_agreement": "agree",
+    "review_notes": "Confirmed copper bridge short in lower-left and lower-right quadrants.",
+    "doc_time_s": 26,
+    "started_at": "2026-10-31T06:28:31.976Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-04",
+    "created_at": "2026-10-31T06:25:31.053Z",
+    "shift": "Shift A (07:00-15:00)",
+    "board_id": "BAT-SMT-204",
+    "board_revision": "A",
+    "line_station": "Line-2-FirstArticle",
+    "operator_id": "OP-BTM-02 (Budi - Line 2)",
+    "inspection_type": "first_article",
+    "image_filename": "/samples/smt_comp_shift_01.jpg",
+    "image_sha256": "dc23c1d4b1a52ddd916cebc73660676d0ff022dc9355389c6d1b41f1935d1c57",
+    "sample_id": "smt_comp_shift_01",
+    "reference_label": "component_shift",
+    "precheck": {
+      "width": 1000,
+      "height": 750,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-SMT-204\",\"inspection_id\":\"INS-20261031-DEMO-04\",\"image_quality\":\"acceptable\",\"defects\":[{\"defect_class\":\"component_shift\",\"location_hint\":\"center-right area, near R5\",\"confidence\":1,\"severity\":\"medium\",\"evidence\":\"The component body is rotated and its terminations are not aligned with the solder pads.\",\"recommended_action\":\"Verify under magnification; rework if confirmed.\"}],\"overall_disposition\":\"rework\",\"visible_labels\":[\"BOARD ID: BAT-SMT-204\",\"REV: A\",\"STATION: SMT-L1\",\"INSPECTION MACRO\",\"R10 (10k)\",\"103\",\"R5 (COMPONENT SHIFT/MISALIGNMENT DETECTED)\",\"R5 SHIFTED\"],\"notes\":\"The image contains explicit text indicating a component shift at R5.\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-SMT-204",
+      "inspection_id": "INS-20261031-DEMO-04",
+      "image_quality": "acceptable",
+      "defects": [
+        {
+          "defect_class": "component_shift",
+          "location_hint": "center-right area, near R5",
+          "confidence": 1,
+          "severity": "medium",
+          "evidence": "The component body is rotated and its terminations are not aligned with the solder pads.",
+          "recommended_action": "Verify under magnification; rework if confirmed."
+        }
+      ],
+      "overall_disposition": "rework",
+      "visible_labels": [
+        "BOARD ID: BAT-SMT-204",
+        "REV: A",
+        "STATION: SMT-L1",
+        "INSPECTION MACRO",
+        "R10 (10k)",
+        "103",
+        "R5 (COMPONENT SHIFT/MISALIGNMENT DETECTED)",
+        "R5 SHIFTED"
+      ],
+      "notes": "The image contains explicit text indicating a component shift at R5.",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 34596,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Operator confirmation required"
+    ],
+    "original_ai_disposition": "rework",
+    "status": "confirmed",
+    "final_defects": [
+      {
+        "defect_class": "component_shift",
+        "severity": "medium",
+        "location_hint": "center-right area, near R5",
+        "source": "ai_accepted",
+        "note": "Confirmed lateral shift >25% pad width on resistor R5; routed to rework cell."
+      }
+    ],
+    "defect_reviews": [
+      {
+        "ai_index": 0,
+        "action": "accept",
+        "defect_class": "component_shift",
+        "severity": "medium",
+        "location_hint": "center-right area, near R5",
+        "note": "Confirmed lateral shift >25% pad width on resistor R5; routed to rework cell."
+      }
+    ],
+    "final_disposition": "rework",
+    "reviewer_id": "OP-BTM-02 (Budi - Line 2)",
+    "reviewed_at": "2026-10-31T06:25:52.053Z",
+    "human_agreement": "agree",
+    "review_notes": "Confirmed lateral shift >25% pad width on resistor R5; routed to rework cell.",
+    "doc_time_s": 21,
+    "started_at": "2026-10-31T06:25:31.053Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-03",
+    "created_at": "2026-10-31T06:22:30.034Z",
+    "shift": "Shift A (07:00-15:00)",
+    "board_id": "BAT-SMT-203",
+    "board_revision": "A",
+    "line_station": "Line-2-FirstArticle",
+    "operator_id": "OP-BTM-02 (Budi - Line 2)",
+    "inspection_type": "first_article",
+    "image_filename": "/samples/smt_tombstone_01.jpg",
+    "image_sha256": "5ed533cb22377f22096ca34cf8b268a1a1e46bcf87d1922e7a84adbe26812a69",
+    "sample_id": "smt_tombstone_01",
+    "reference_label": "tombstoning",
+    "precheck": {
+      "width": 1000,
+      "height": 750,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-SMT-203\",\"inspection_id\":\"INS-20261031-DEMO-03\",\"image_quality\":\"acceptable\",\"defects\":[{\"defect_class\":\"tombstoning\",\"location_hint\":\"center-right area, near C7\",\"confidence\":1,\"severity\":\"medium\",\"evidence\":\"Component C7 is standing upright on the left pad, leaving the right pad open.\",\"recommended_action\":\"Rework component C7.\"}],\"overall_disposition\":\"rework\",\"visible_labels\":[\"BOARD ID: BAT-SMT-203\",\"REV: A\",\"STATION: SMT-L1\",\"INSPECTION MACRO\",\"R10 (10k)\",\"103\",\"C7 (TOMBSTONED LIFTED OFF RIGHT PAD)\",\"OPEN PAD\"],\"notes\":\"No BGA/QFN packages visible; hidden joints were not assessed.\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-SMT-203",
+      "inspection_id": "INS-20261031-DEMO-03",
+      "image_quality": "acceptable",
+      "defects": [
+        {
+          "defect_class": "tombstoning",
+          "location_hint": "center-right area, near C7",
+          "confidence": 1,
+          "severity": "medium",
+          "evidence": "Component C7 is standing upright on the left pad, leaving the right pad open.",
+          "recommended_action": "Rework component C7."
+        }
+      ],
+      "overall_disposition": "rework",
+      "visible_labels": [
+        "BOARD ID: BAT-SMT-203",
+        "REV: A",
+        "STATION: SMT-L1",
+        "INSPECTION MACRO",
+        "R10 (10k)",
+        "103",
+        "C7 (TOMBSTONED LIFTED OFF RIGHT PAD)",
+        "OPEN PAD"
+      ],
+      "notes": "No BGA/QFN packages visible; hidden joints were not assessed.",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 37389,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Operator confirmation required"
+    ],
+    "original_ai_disposition": "rework",
+    "status": "confirmed",
+    "final_defects": [
+      {
+        "defect_class": "tombstoning",
+        "severity": "medium",
+        "location_hint": "center-right area, near C7",
+        "source": "ai_accepted",
+        "note": "Confirmed capacitor C7 lifted off right pad (tombstoning); reflow profile check requested."
+      }
+    ],
+    "defect_reviews": [
+      {
+        "ai_index": 0,
+        "action": "accept",
+        "defect_class": "tombstoning",
+        "severity": "medium",
+        "location_hint": "center-right area, near C7",
+        "note": "Confirmed capacitor C7 lifted off right pad (tombstoning); reflow profile check requested."
+      }
+    ],
+    "final_disposition": "rework",
+    "reviewer_id": "OP-BTM-02 (Budi - Line 2)",
+    "reviewed_at": "2026-10-31T06:22:47.034Z",
+    "human_agreement": "agree",
+    "review_notes": "Confirmed capacitor C7 lifted off right pad (tombstoning); reflow profile check requested.",
+    "doc_time_s": 17,
+    "started_at": "2026-10-31T06:22:30.034Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-02",
+    "created_at": "2026-10-31T06:19:27.213Z",
+    "shift": "Shift A (07:00-15:00)",
+    "board_id": "BAT-SMT-202",
+    "board_revision": "A",
+    "line_station": "Line-1-PostReflow",
+    "operator_id": "OP-BTM-01 (Siti - Line 1)",
+    "inspection_type": "post_reflow",
+    "image_filename": "/samples/smt_polarity_err_01.jpg",
+    "image_sha256": "cc37ab809e744b3bb6784ed7995a7bd71bd9e8e172f2236634bb8848243976d8",
+    "sample_id": "smt_polarity_err_01",
+    "reference_label": "polarity_error",
+    "precheck": {
+      "width": 1000,
+      "height": 750,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-SMT-202\",\"inspection_id\":\"INS-20261031-DEMO-02\",\"image_quality\":\"acceptable\",\"defects\":[{\"defect_class\":\"polarity_error\",\"location_hint\":\"center-right region, diode D3\",\"confidence\":0.91,\"severity\":\"high\",\"evidence\":\"Visible polarity error anomaly detected in center-right region, diode D3 matching polarity_error taxonomy criteria.\",\"recommended_action\":\"Verify polarity error at center-right region, diode D3 and route to quarantine.\"}],\"overall_disposition\":\"quarantine\",\"visible_labels\":[\"BOARD ID: BAT-SMT-202\",\"REV: A\",\"STATION: SMT-L1\"],\"notes\":\"Procedural SMT inspection test card illustrating polarity error (center-right region, diode D3). Hidden BGA/QFN joints not assessed (requires X-ray).\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-SMT-202",
+      "inspection_id": "INS-20261031-DEMO-02",
+      "image_quality": "acceptable",
+      "defects": [
+        {
+          "defect_class": "polarity_error",
+          "location_hint": "center-right region, diode D3",
+          "confidence": 0.91,
+          "severity": "high",
+          "evidence": "Visible polarity error anomaly detected in center-right region, diode D3 matching polarity_error taxonomy criteria.",
+          "recommended_action": "Verify polarity error at center-right region, diode D3 and route to quarantine."
+        }
+      ],
+      "overall_disposition": "quarantine",
+      "visible_labels": [
+        "BOARD ID: BAT-SMT-202",
+        "REV: A",
+        "STATION: SMT-L1"
+      ],
+      "notes": "Procedural SMT inspection test card illustrating polarity error (center-right region, diode D3). Hidden BGA/QFN joints not assessed (requires X-ray).",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 28982,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Operator confirmation required"
+    ],
+    "original_ai_disposition": "quarantine",
+    "status": "confirmed",
+    "final_defects": [
+      {
+        "defect_class": "polarity_error",
+        "severity": "high",
+        "location_hint": "center-right region, diode D3",
+        "source": "ai_accepted",
+        "note": "Confirmed cathode band reversed on diode D3; board quarantined per IPC-A-610."
+      }
+    ],
+    "defect_reviews": [
+      {
+        "ai_index": 0,
+        "action": "accept",
+        "defect_class": "polarity_error",
+        "severity": "high",
+        "location_hint": "center-right region, diode D3",
+        "note": "Confirmed cathode band reversed on diode D3; board quarantined per IPC-A-610."
+      }
+    ],
+    "final_disposition": "quarantine",
+    "reviewer_id": "OP-BTM-01 (Siti - Line 1)",
+    "reviewed_at": "2026-10-31T06:19:51.213Z",
+    "human_agreement": "agree",
+    "review_notes": "Confirmed cathode band reversed on diode D3; board quarantined per IPC-A-610.",
+    "doc_time_s": 24,
+    "started_at": "2026-10-31T06:19:27.213Z"
+  },
+  {
+    "id": "INS-20261031-DEMO-01",
+    "created_at": "2026-10-31T06:16:16.620Z",
+    "shift": "Shift A (07:00-15:00)",
+    "board_id": "BAT-SMT-201",
+    "board_revision": "A",
+    "line_station": "Line-1-PostReflow",
+    "operator_id": "OP-BTM-01 (Siti - Line 1)",
+    "inspection_type": "post_reflow",
+    "image_filename": "/samples/smt_missing_comp_01.jpg",
+    "image_sha256": "f6c05047a3e1cab6b466dc4d9f594bffbdd066ce01279747d496dfae1079aaa9",
+    "sample_id": "smt_missing_comp_01",
+    "reference_label": "missing_component",
+    "precheck": {
+      "width": 1000,
+      "height": 750,
+      "status": "Acceptable"
+    },
+    "ai_source": "live_gemma",
+    "model_id": "gemma-4-26b-a4b-it",
+    "prompt_version": "aoi-prompt-v1.0",
+    "prompt_sha": "ac6cb03bb977",
+    "ai_raw_text": "{\"board_id\":\"BAT-SMT-201\",\"inspection_id\":\"INS-20261031-DEMO-01\",\"image_quality\":\"acceptable\",\"defects\":[{\"defect_class\":\"missing_component\",\"location_hint\":\"center right, near R12\",\"confidence\":1,\"severity\":\"high\",\"evidence\":\"The footprint for R12 shows two empty solder pads with no component mounted between them, as explicitly noted by the inspection overlay.\",\"recommended_action\":\"Install component R12 and verify solder joint integrity.\"}],\"overall_disposition\":\"rework\",\"visible_labels\":[\"BOARD ID: BAT-SMT-201\",\"REV: A\",\"STATION: SMT-L1\",\"INSPECTION MACRO\",\"R10 (10k)\",\"103\",\"R12 (MISSING COMPONENT AT FOOTPRINT)\"],\"notes\":\"The image includes automated inspection annotations that clearly identify the missing component at R12.\",\"model\":\"gemma-4-multimodal\",\"operator_confirmation_required\":true}",
+    "ai_result": {
+      "board_id": "BAT-SMT-201",
+      "inspection_id": "INS-20261031-DEMO-01",
+      "image_quality": "acceptable",
+      "defects": [
+        {
+          "defect_class": "missing_component",
+          "location_hint": "center right, near R12",
+          "confidence": 1,
+          "severity": "high",
+          "evidence": "The footprint for R12 shows two empty solder pads with no component mounted between them, as explicitly noted by the inspection overlay.",
+          "recommended_action": "Install component R12 and verify solder joint integrity."
+        }
+      ],
+      "overall_disposition": "rework",
+      "visible_labels": [
+        "BOARD ID: BAT-SMT-201",
+        "REV: A",
+        "STATION: SMT-L1",
+        "INSPECTION MACRO",
+        "R10 (10k)",
+        "103",
+        "R12 (MISSING COMPONENT AT FOOTPRINT)"
+      ],
+      "notes": "The image includes automated inspection annotations that clearly identify the missing component at R12.",
+      "model": "gemma-4-multimodal",
+      "operator_confirmation_required": true
+    },
+    "ai_attempts": 1,
+    "ai_latency_ms": 30509,
+    "ai_errors": [],
+    "routing_reasons": [
+      "Operator confirmation required"
+    ],
+    "original_ai_disposition": "rework",
+    "status": "confirmed",
+    "final_defects": [
+      {
+        "defect_class": "missing_component",
+        "severity": "high",
+        "location_hint": "center right, near R12",
+        "source": "ai_accepted",
+        "note": "Confirmed missing 0805 resistor at R12; sent to Line 1 touch-up bench."
+      }
+    ],
+    "defect_reviews": [
+      {
+        "ai_index": 0,
+        "action": "accept",
+        "defect_class": "missing_component",
+        "severity": "high",
+        "location_hint": "center right, near R12",
+        "note": "Confirmed missing 0805 resistor at R12; sent to Line 1 touch-up bench."
+      }
+    ],
+    "final_disposition": "rework",
+    "reviewer_id": "OP-BTM-01 (Siti - Line 1)",
+    "reviewed_at": "2026-10-31T06:16:35.620Z",
+    "human_agreement": "agree",
+    "review_notes": "Confirmed missing 0805 resistor at R12; sent to Line 1 touch-up bench.",
+    "doc_time_s": 19,
+    "started_at": "2026-10-31T06:16:16.620Z"
+  }
+]

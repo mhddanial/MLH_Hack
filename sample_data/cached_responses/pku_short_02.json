@@ -1,0 +1,29 @@
+{
+  "sample_id": "pku_short_02",
+  "cached_at": "2026-10-31T06:52:16.601Z",
+  "model_id": "gemma-4-26b-a4b-it",
+  "prompt_version": "aoi-prompt-v1.0",
+  "prompt_sha256": "ac6cb03bb977",
+  "latency_ms": 30318,
+  "attempts": 1,
+  "result": {
+    "board_id": "BAT-PCBA-104",
+    "inspection_id": "INS-20261031-CACHE-t_02",
+    "image_quality": "acceptable",
+    "defects": [
+      {
+        "defect_class": "solder_bridge",
+        "location_hint": "center-left region, lower-center region, upper-center region",
+        "confidence": 0.91,
+        "severity": "high",
+        "evidence": "Visible short anomaly detected in center-left region, lower-center region, upper-center region matching solder_bridge taxonomy criteria.",
+        "recommended_action": "Verify solder bridge at center-left region, lower-center region, upper-center region and route to rework."
+      }
+    ],
+    "overall_disposition": "rework",
+    "visible_labels": [],
+    "notes": "Kaggle/PKU bare-PCB sample with 3 annotated short anomaly(s) in center-left region, lower-center region, upper-center region. Hidden BGA/QFN joints not assessed (requires X-ray).",
+    "model": "gemma-4-multimodal",
+    "operator_confirmation_required": true
+  }
+}

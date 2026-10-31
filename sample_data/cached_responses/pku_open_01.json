@@ -1,0 +1,29 @@
+{
+  "sample_id": "pku_open_01",
+  "cached_at": "2026-10-31T06:52:16.606Z",
+  "model_id": "gemma-4-26b-a4b-it",
+  "prompt_version": "aoi-prompt-v1.0",
+  "prompt_sha256": "ac6cb03bb977",
+  "latency_ms": 30152,
+  "attempts": 1,
+  "result": {
+    "board_id": "BAT-PCBA-102",
+    "inspection_id": "INS-20261031-CACHE-n_01",
+    "image_quality": "acceptable",
+    "defects": [
+      {
+        "defect_class": "uncertain_or_other",
+        "location_hint": "lower-center region, lower-left quadrant, upper-center region",
+        "confidence": 0.56,
+        "severity": "high",
+        "evidence": "Visible open circuit anomaly detected in lower-center region, lower-left quadrant, upper-center region matching uncertain_or_other taxonomy criteria.",
+        "recommended_action": "Inspect copper trace anomaly under 10x microscope; escalate to QA if copper trace width is below IPC-A-600 minimum."
+      }
+    ],
+    "overall_disposition": "requires_human_verification",
+    "visible_labels": [],
+    "notes": "Kaggle/PKU bare-PCB sample with 3 annotated open circuit anomaly(s) in lower-center region, lower-left quadrant, upper-center region. Hidden BGA/QFN joints not assessed (requires X-ray).",
+    "model": "gemma-4-multimodal",
+    "operator_confirmation_required": true
+  }
+}

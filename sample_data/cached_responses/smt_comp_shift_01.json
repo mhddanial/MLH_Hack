@@ -1,0 +1,38 @@
+{
+  "sample_id": "smt_comp_shift_01",
+  "cached_at": "2026-10-31T06:52:12.122Z",
+  "model_id": "gemma-4-26b-a4b-it",
+  "prompt_version": "aoi-prompt-v1.0",
+  "prompt_sha256": "ac6cb03bb977",
+  "latency_ms": 34596,
+  "attempts": 1,
+  "result": {
+    "board_id": "BAT-SMT-204",
+    "inspection_id": "INS-20261031-167956-t_01",
+    "image_quality": "acceptable",
+    "defects": [
+      {
+        "defect_class": "component_shift",
+        "location_hint": "center-right area, near R5",
+        "confidence": 1,
+        "severity": "medium",
+        "evidence": "The component body is rotated and its terminations are not aligned with the solder pads.",
+        "recommended_action": "Verify under magnification; rework if confirmed."
+      }
+    ],
+    "overall_disposition": "rework",
+    "visible_labels": [
+      "BOARD ID: BAT-SMT-204",
+      "REV: A",
+      "STATION: SMT-L1",
+      "INSPECTION MACRO",
+      "R10 (10k)",
+      "103",
+      "R5 (COMPONENT SHIFT/MISALIGNMENT DETECTED)",
+      "R5 SHIFTED"
+    ],
+    "notes": "The image contains explicit text indicating a component shift at R5.",
+    "model": "gemma-4-multimodal",
+    "operator_confirmation_required": true
+  }
+}

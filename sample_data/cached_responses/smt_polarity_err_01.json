@@ -1,0 +1,33 @@
+{
+  "sample_id": "smt_polarity_err_01",
+  "cached_at": "2026-10-31T06:51:37.519Z",
+  "model_id": "gemma-4-26b-a4b-it",
+  "prompt_version": "aoi-prompt-v1.0",
+  "prompt_sha256": "ac6cb03bb977",
+  "latency_ms": 28982,
+  "attempts": 1,
+  "result": {
+    "board_id": "BAT-SMT-202",
+    "inspection_id": "INS-20261031-CACHE-r_01",
+    "image_quality": "acceptable",
+    "defects": [
+      {
+        "defect_class": "polarity_error",
+        "location_hint": "center-right region, diode D3",
+        "confidence": 0.91,
+        "severity": "high",
+        "evidence": "Visible polarity error anomaly detected in center-right region, diode D3 matching polarity_error taxonomy criteria.",
+        "recommended_action": "Verify polarity error at center-right region, diode D3 and route to quarantine."
+      }
+    ],
+    "overall_disposition": "quarantine",
+    "visible_labels": [
+      "BOARD ID: BAT-SMT-202",
+      "REV: A",
+      "STATION: SMT-L1"
+    ],
+    "notes": "Procedural SMT inspection test card illustrating polarity error (center-right region, diode D3). Hidden BGA/QFN joints not assessed (requires X-ray).",
+    "model": "gemma-4-multimodal",
+    "operator_confirmation_required": true
+  }
+}

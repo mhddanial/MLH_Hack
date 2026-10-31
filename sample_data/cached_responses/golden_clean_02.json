@@ -1,0 +1,20 @@
+{
+  "sample_id": "golden_clean_02",
+  "cached_at": "2026-10-31T06:52:16.612Z",
+  "model_id": "gemma-4-26b-a4b-it",
+  "prompt_version": "aoi-prompt-v1.0",
+  "prompt_sha256": "ac6cb03bb977",
+  "latency_ms": 31355,
+  "attempts": 1,
+  "result": {
+    "board_id": "BAT-PCBA-GOLD-04",
+    "inspection_id": "INS-20261031-CACHE-n_02",
+    "image_quality": "acceptable",
+    "defects": [],
+    "overall_disposition": "pass",
+    "visible_labels": [],
+    "notes": "Clean reference PCB with intact copper traces and zero visible surface anomalies. Hidden BGA/QFN joints require X-ray.",
+    "model": "gemma-4-multimodal",
+    "operator_confirmation_required": true
+  }
+}

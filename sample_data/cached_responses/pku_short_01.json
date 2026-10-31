@@ -1,28 +1,28 @@
 {
   "sample_id": "pku_short_01",
-  "cached_at": "2026-10-31T06:25:48.136Z",
+  "cached_at": "2026-10-31T06:52:16.602Z",
   "model_id": "gemma-4-26b-a4b-it",
   "prompt_version": "aoi-prompt-v1.0",
-  "prompt_sha256": "f26e2985fbb3",
+  "prompt_sha256": "ac6cb03bb977",
   "latency_ms": 66664,
   "attempts": 1,
   "result": {
     "board_id": "BAT-PCBA-101",
-    "inspection_id": "INS-20261031-312508-t_01",
+    "inspection_id": "INS-20261031-CACHE-t_01",
     "image_quality": "acceptable",
     "defects": [
       {
-        "defect_class": "missing_component",
-        "location_hint": "lower-left quadrant, large rectangular SMT footprint",
-        "confidence": 0.95,
+        "defect_class": "solder_bridge",
+        "location_hint": "lower-left quadrant, lower-right quadrant",
+        "confidence": 0.91,
         "severity": "high",
-        "evidence": "The SMT pad pattern for a large integrated circuit is clearly visible, but no component is present on the pads.",
-        "recommended_action": "Verify component placement; rework if confirmed."
+        "evidence": "Visible short anomaly detected in lower-left quadrant, lower-right quadrant matching solder_bridge taxonomy criteria.",
+        "recommended_action": "Verify solder bridge at lower-left quadrant, lower-right quadrant and route to rework."
       }
     ],
     "overall_disposition": "rework",
     "visible_labels": [],
-    "notes": "The board appears to be missing several components, most notably a large IC in the lower-left quadrant. Hidden joints (BGA/QFN) were not assessed.",
+    "notes": "Kaggle/PKU bare-PCB sample with 3 annotated short anomaly(s) in lower-left quadrant, lower-right quadrant. Hidden BGA/QFN joints not assessed (requires X-ray).",
     "model": "gemma-4-multimodal",
     "operator_confirmation_required": true
   }

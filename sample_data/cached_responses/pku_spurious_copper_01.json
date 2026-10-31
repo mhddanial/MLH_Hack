@@ -1,0 +1,29 @@
+{
+  "sample_id": "pku_spurious_copper_01",
+  "cached_at": "2026-10-31T06:52:16.610Z",
+  "model_id": "gemma-4-26b-a4b-it",
+  "prompt_version": "aoi-prompt-v1.0",
+  "prompt_sha256": "ac6cb03bb977",
+  "latency_ms": 28486,
+  "attempts": 1,
+  "result": {
+    "board_id": "BAT-PCBA-109",
+    "inspection_id": "INS-20261031-CACHE-r_01",
+    "image_quality": "acceptable",
+    "defects": [
+      {
+        "defect_class": "uncertain_or_other",
+        "location_hint": "lower-center region, lower-left quadrant, lower-right quadrant",
+        "confidence": 0.56,
+        "severity": "low",
+        "evidence": "Visible spurious copper anomaly detected in lower-center region, lower-left quadrant, lower-right quadrant matching uncertain_or_other taxonomy criteria.",
+        "recommended_action": "Inspect copper trace anomaly under 10x microscope; escalate to QA if copper trace width is below IPC-A-600 minimum."
+      }
+    ],
+    "overall_disposition": "requires_human_verification",
+    "visible_labels": [],
+    "notes": "Kaggle/PKU bare-PCB sample with 3 annotated spurious copper anomaly(s) in lower-center region, lower-left quadrant, lower-right quadrant. Hidden BGA/QFN joints not assessed (requires X-ray).",
+    "model": "gemma-4-multimodal",
+    "operator_confirmation_required": true
+  }
+}
